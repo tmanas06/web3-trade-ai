@@ -8,6 +8,11 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Markets from "./pages/Markets";
 import Wallet from "./pages/Wallet";
+import Trading from "./pages/Trading";
+import Assets from "./pages/Assets";
+import Network from "./pages/Network";
+import Data from "./pages/Data";
+import Settings from "./pages/Settings";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
@@ -50,6 +55,46 @@ const App = () => (
             element={
               <Layout>
                 <Wallet />
+              </Layout>
+            } 
+          />
+          <Route 
+            path="/trading" 
+            element={
+              <Layout>
+                <Trading />
+              </Layout>
+            } 
+          />
+          <Route 
+            path="/assets" 
+            element={
+              <Layout>
+                <Assets />
+              </Layout>
+            } 
+          />
+          <Route 
+            path="/network" 
+            element={
+              <Layout>
+                <Network />
+              </Layout>
+            } 
+          />
+          <Route 
+            path="/data" 
+            element={
+              <Layout>
+                <Data />
+              </Layout>
+            } 
+          />
+          <Route 
+            path="/settings" 
+            element={
+              <Layout>
+                <Settings />
               </Layout>
             } 
           />
