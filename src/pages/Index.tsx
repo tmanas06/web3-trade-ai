@@ -1,13 +1,33 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React from 'react';
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/layout/Sidebar";
+import { Header } from "@/components/layout/Header";
+import Dashboard from './Dashboard';
+import { AIAssistant } from '@/components/layout/AIAssistant';
 
 const Index = () => {
+  const [showAIAssistant, setShowAIAssistant] = React.useState(true);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <AppSidebar />
+        <div className="flex-1 flex flex-col">
+          <Header />
+          <div className="flex-1 flex overflow-hidden">
+            <div className="flex-1 overflow-auto">
+              <Dashboard />
+            </div>
+            {showAIAssistant && (
+              <div className="w-96 border-l border-white/10 p-4">
+                <AIAssistant />
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 
