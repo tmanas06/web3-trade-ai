@@ -33,7 +33,7 @@ const Index = () => {
               <Dashboard />
             </div>
             {showAIAssistant && (
-              <div className="w-96 border-l border-white/10 p-4">
+              <div className="w-80 lg:w-96 border-l border-white/10">
                 <AIAssistant />
               </div>
             )}
