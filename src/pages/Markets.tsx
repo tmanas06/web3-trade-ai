@@ -2,6 +2,8 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 const Markets = () => {
   const markets = [
@@ -17,7 +19,33 @@ const Markets = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold mb-6">Markets</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Markets</h1>
+        <div className="flex space-x-4">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+            asChild
+          >
+            <Link to="/">
+              <ArrowLeft className="h-4 w-4" />
+              Dashboard
+            </Link>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+            asChild
+          >
+            <Link to="/wallet">
+              Wallet
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+      </div>
       
       <Card className="glass-effect">
         <CardHeader>
@@ -48,6 +76,33 @@ const Markets = () => {
           </div>
         </CardContent>
       </Card>
+
+      <div className="flex justify-center mt-6">
+        <div className="flex space-x-4">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+            asChild
+          >
+            <Link to="/">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Dashboard
+            </Link>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
+            asChild
+          >
+            <Link to="/wallet">
+              Go to Wallet
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
