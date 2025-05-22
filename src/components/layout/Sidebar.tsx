@@ -22,7 +22,7 @@ import {
   Bitcoin,
   Database
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const menuItems = [
   {
@@ -68,6 +68,8 @@ const menuItems = [
 ];
 
 export function AppSidebar() {
+  const location = useLocation();
+  
   return (
     <Sidebar>
       <SidebarHeader className="flex items-center px-4 py-6">
@@ -75,7 +77,7 @@ export function AppSidebar() {
           <div className="h-8 w-8 rounded-full bg-gradient-to-r from-crypto-accent to-crypto-accent-purple flex items-center justify-center">
             <span className="text-white font-bold text-lg">AI</span>
           </div>
-          <div className="font-bold text-lg text-white">CryptoAI</div>
+          <Link to="/" className="font-bold text-lg text-white">CryptoAI</Link>
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -85,7 +87,10 @@ export function AppSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton 
+                    asChild
+                    className={location.pathname === item.path ? 'bg-accent/20' : ''}
+                  >
                     <Link to={item.path} className="flex items-center">
                       <item.icon className="h-5 w-5 mr-3" />
                       <span>{item.title}</span>

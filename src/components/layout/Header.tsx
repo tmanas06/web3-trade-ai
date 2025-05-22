@@ -6,6 +6,12 @@ import { Search } from 'lucide-react';
 import { ConnectWalletButton } from '@/components/crypto/ConnectWalletButton';
 
 export function Header() {
+  // Function to toggle AI Assistant visibility
+  const toggleAIAssistant = () => {
+    const event = new CustomEvent('toggle-ai-assistant');
+    window.dispatchEvent(event);
+  };
+
   return (
     <header className="border-b border-white/10 py-3 px-6">
       <div className="flex items-center justify-between">
@@ -27,6 +33,7 @@ export function Header() {
             variant="outline" 
             size="sm" 
             className="border-crypto-accent text-crypto-accent hover:bg-crypto-accent/10"
+            onClick={toggleAIAssistant}
           >
             AI Assistant
           </Button>

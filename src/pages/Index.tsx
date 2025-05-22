@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
@@ -8,6 +8,19 @@ import { AIAssistant } from '@/components/layout/AIAssistant';
 
 const Index = () => {
   const [showAIAssistant, setShowAIAssistant] = React.useState(true);
+
+  useEffect(() => {
+    // Listen for the custom event to toggle AI Assistant
+    const handleToggleAIAssistant = () => {
+      setShowAIAssistant(prev => !prev);
+    };
+
+    window.addEventListener('toggle-ai-assistant', handleToggleAIAssistant);
+
+    return () => {
+      window.removeEventListener('toggle-ai-assistant', handleToggleAIAssistant);
+    };
+  }, []);
 
   return (
     <SidebarProvider>
