@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,6 +15,7 @@ import Settings from "./pages/Settings";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
+import { WalletProvider } from "./contexts/WalletContext";
 
 const queryClient = new QueryClient();
 
@@ -36,73 +36,75 @@ const Layout = ({ children }) => (
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route 
-            path="/markets" 
-            element={
-              <Layout>
-                <Markets />
-              </Layout>
-            } 
-          />
-          <Route 
-            path="/wallet" 
-            element={
-              <Layout>
-                <Wallet />
-              </Layout>
-            } 
-          />
-          <Route 
-            path="/trading" 
-            element={
-              <Layout>
-                <Trading />
-              </Layout>
-            } 
-          />
-          <Route 
-            path="/assets" 
-            element={
-              <Layout>
-                <Assets />
-              </Layout>
-            } 
-          />
-          <Route 
-            path="/network" 
-            element={
-              <Layout>
-                <Network />
-              </Layout>
-            } 
-          />
-          <Route 
-            path="/data" 
-            element={
-              <Layout>
-                <Data />
-              </Layout>
-            } 
-          />
-          <Route 
-            path="/settings" 
-            element={
-              <Layout>
-                <Settings />
-              </Layout>
-            } 
-          />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <WalletProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route 
+              path="/markets" 
+              element={
+                <Layout>
+                  <Markets />
+                </Layout>
+              } 
+            />
+            <Route 
+              path="/wallet" 
+              element={
+                <Layout>
+                  <Wallet />
+                </Layout>
+              } 
+            />
+            <Route 
+              path="/trading" 
+              element={
+                <Layout>
+                  <Trading />
+                </Layout>
+              } 
+            />
+            <Route 
+              path="/assets" 
+              element={
+                <Layout>
+                  <Assets />
+                </Layout>
+              } 
+            />
+            <Route 
+              path="/network" 
+              element={
+                <Layout>
+                  <Network />
+                </Layout>
+              } 
+            />
+            <Route 
+              path="/data" 
+              element={
+                <Layout>
+                  <Data />
+                </Layout>
+              } 
+            />
+            <Route 
+              path="/settings" 
+              element={
+                <Layout>
+                  <Settings />
+                </Layout>
+              } 
+            />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </WalletProvider>
   </QueryClientProvider>
 );
 

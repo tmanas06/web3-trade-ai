@@ -1,13 +1,12 @@
-
-import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect } from 'react';
 import { Wallet } from 'lucide-react';
 import { 
   Dialog, 
   DialogContent, 
   DialogHeader, 
   DialogTitle, 
-  DialogTrigger 
+  DialogTrigger,
+  DialogDescription 
 } from "@/components/ui/dialog";
 import { 
   Card, 
@@ -17,74 +16,113 @@ import {
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+declare global {
+  interface Window {
+    solana?: any;
+    phantom?: {
+      solana: any;
+    };
+  }
+}
 
 export function ConnectWalletButton() {
   const [connected, setConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState('');
+  const [provider, setProvider] = useState<any>(null);
+  const [open, setOpen] = useState(false);
 
-  const simulateWalletConnect = (walletType: string) => {
-    // In a real app, this would connect to the actual wallet
-    const mockAddress = '8xdt4GHpUiAMKvXLZYM1JMWVVUrhvZ7L7Fv5fBPjXUWE';
-    setWalletAddress(mockAddress);
-    setConnected(true);
+  // Check if Phantom is installed
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window.phantom?.solana || window.solana?.isPhantom)) {
+      setProvider(window.phantom?.solana || window.solana);
+      
+      // Check if already connected
+      if (window.phantom?.solana?.isConnected) {
+        handleConnect();
+      }
+    }
+  }, []);
+
+  const handleConnect = async () => {
+    try {
+      if (!provider) {
+        window.open('https://phantom.app/', '_blank');
+        return;
+      }
+
+      const response = await provider.connect();
+      const address = response.publicKey.toString();
+      setWalletAddress(address);
+      setConnected(true);
+      setOpen(false);
+      
+      // Listen for account changes
+      provider.on('disconnect', () => {
+        setConnected(false);
+        setWalletAddress('');
+      });
+      
+      provider.on('accountChanged', (publicKey: any) => {
+        if (publicKey) {
+          setWalletAddress(publicKey.toString());
+        } else {
+          setConnected(false);
+          setWalletAddress('');
+        }
+      });
+      
+    } catch (error) {
+      console.error('Error connecting to Phantom wallet:', error);
+    }
   };
 
-  const disconnectWallet = () => {
-    setWalletAddress('');
-    setConnected(false);
+  const disconnectWallet = async () => {
+    try {
+      if (provider && provider.disconnect) {
+        await provider.disconnect();
+      }
+      setConnected(false);
+      setWalletAddress('');
+      setOpen(false);
+    } catch (error) {
+      console.error('Error disconnecting wallet:', error);
+    }
   };
+
+  const shortAddress = walletAddress 
+    ? `${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}`
+    : '';
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button 
-          variant={connected ? "default" : "secondary"} 
-          size="sm" 
-          className={connected ? "bg-crypto-solana hover:bg-crypto-solana/90" : ""}
+          variant={connected ? "outline" : "default"}
+          className={connected ? "bg-background hover:bg-accent" : ""}
         >
-          <Wallet className="h-4 w-4 mr-2" />
-          {connected ? walletAddress.slice(0, 4) + '...' + walletAddress.slice(-4) : "Connect Wallet"}
+          <Wallet className="mr-2 h-4 w-4" />
+          {connected ? shortAddress : 'Connect Wallet'}
         </Button>
       </DialogTrigger>
-      <DialogContent className="glass-effect border-none">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{connected ? "Wallet Connected" : "Connect Your Wallet"}</DialogTitle>
+          <DialogTitle>
+            {connected ? 'Wallet Connected' : 'Connect Wallet'}
+          </DialogTitle>
+          <DialogDescription>
+            {connected 
+              ? 'Your wallet is connected to the application.'
+              : 'Connect your wallet to continue.'}
+          </DialogDescription>
         </DialogHeader>
         
-        {!connected ? (
-          <div className="grid grid-cols-2 gap-4 py-4">
-            <Card className="cursor-pointer hover:border-crypto-accent/50 transition-all" onClick={() => simulateWalletConnect('phantom')}>
-              <CardHeader className="p-4">
-                <CardTitle className="text-base">Phantom</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 pt-0">
-                <div className="h-12 w-12 bg-gradient-to-r from-purple-600 to-violet-600 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold">Ph</span>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="cursor-pointer hover:border-crypto-accent/50 transition-all" onClick={() => simulateWalletConnect('solflare')}>
-              <CardHeader className="p-4">
-                <CardTitle className="text-base">Solflare</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 pt-0">
-                <div className="h-12 w-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold">Sf</span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        ) : (
-          <div className="py-4">
+        <div className="grid gap-4 py-4">
+          {connected ? (
             <Card>
-              <CardHeader className="p-4">
-                <CardTitle className="text-base flex items-center">
-                  <div className="h-6 w-6 bg-gradient-to-r from-purple-600 to-violet-600 rounded-full flex items-center justify-center mr-2">
-                    <span className="text-white font-bold text-xs">Ph</span>
-                  </div>
-                  Phantom Wallet
-                </CardTitle>
+              <CardHeader>
+                <CardTitle>Connected Wallet</CardTitle>
                 <CardDescription className="break-all">
                   {walletAddress}
                 </CardDescription>
@@ -99,8 +137,20 @@ export function ConnectWalletButton() {
                 </Button>
               </CardFooter>
             </Card>
-          </div>
-        )}
+          ) : (
+            <Button 
+              onClick={handleConnect}
+              className="w-full py-6 flex items-center justify-center gap-2"
+            >
+              <img 
+                src="https://phantom.app/favicon.ico" 
+                alt="Phantom" 
+                className="h-6 w-6"
+              />
+              Connect with Phantom
+            </Button>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
