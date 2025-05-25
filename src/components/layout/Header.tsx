@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Search } from 'lucide-react';
-import { ConnectWalletButton } from '@/components/crypto/ConnectWalletButton';
+import ConnectWalletButton from '@/components/crypto/ConnectWalletButton';
 
 export function Header() {
   // Function to toggle AI Assistant visibility
