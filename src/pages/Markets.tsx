@@ -1,283 +1,165 @@
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Loader2, AlertCircle, RefreshCw } from "lucide-react";
-import { TickerData, fetchPopularPairs } from '@/services/okxService';
+// pages/Markets.tsx
+import React, { useEffect, useState } from "react";
+import {
+  DexToken,
+  DexMarketData,
+  fetchBatchTokenPrices,
+  fetchCandles,
+} from "@/services/okxDexService";
+import MarketSparkline from "@/components/MarketSparkLine";
+import MarketDetailModal from "@/components/MarketDetailModal";
 
-// List of popular trading pairs to display
-const POPULAR_PAIRS = [
-  'BTC-USDT',
-  'ETH-USDT',
-  'SOL-USDT',
-  'XRP-USDT',
-  'ADA-USDT',
-  'AVAX-USDT',
-  'DOT-USDT',
-  'MATIC-USDT',
-  'LINK-USDT',
-  'DOGE-USDT',
-  'ATOM-USDT',
-  'LTC-USDT',
+const TOKENS: DexToken[] = [
+  { chainIndex: "1", tokenContractAddress: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", symbol: "ETH", name: "Ethereum" },
+  { chainIndex: "1", tokenContractAddress: "0xdac17f958d2ee523a2206206994597c13d831ec7", symbol: "USDT", name: "Tether USD" },
+  { chainIndex: "1", tokenContractAddress: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", symbol: "USDC", name: "USD Coin" },
+  { chainIndex: "1", tokenContractAddress: "0x6b175474e89094c44da98b954eedeac495271d0f", symbol: "DAI", name: "Dai" },
+  { chainIndex: "1", tokenContractAddress: "0x514910771af9ca656af840dff83e8264ecf986ca", symbol: "LINK", name: "Chainlink" },
 ];
 
-interface MarketData extends TickerData {
-  change24h: number;
-  formattedPrice: string;
-  loading: boolean;
-  error?: string;
-}
-
-const Markets = () => {
-  const [markets, setMarkets] = useState<MarketData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-
-  const loadMarketData = async () => {
-    console.log('[Markets] Loading market data...');
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // Set initial loading state for all markets
-      setMarkets(POPULAR_PAIRS.map(pair => ({
-        instId: pair,
-        last: '0',
-        lastSz: '0',
-        askPx: '0',
-        askSz: '0',
-        bidPx: '0',
-        bidSz: '0',
-        open24h: '0',
-        high24h: '0',
-        low24h: '0',
-        volCcy24h: '0',
-        vol24h: '0',
-        sodUtc0: '0',
-        sodUtc8: '0',
-        ts: '0',
-        change24h: 0,
-        formattedPrice: '...',
-        loading: true
-      })));
-
-      // Fetch all tickers at once
-      console.log('[Markets] Fetching tickers...');
-      const tickers = await fetchPopularPairs(POPULAR_PAIRS);
-      console.log('[Markets] Fetched tickers:', tickers);
-      
-      // Update state with fetched data
-      setMarkets(POPULAR_PAIRS.map(pair => {
-        const ticker = tickers.find(t => t.instId === pair);
-        
-        if (!ticker) {
-          return {
-            instId: pair,
-            last: '0',
-            lastSz: '0',
-            askPx: '0',
-            askSz: '0',
-            bidPx: '0',
-            bidSz: '0',
-            open24h: '0',
-            high24h: '0',
-            low24h: '0',
-            volCcy24h: '0',
-            vol24h: '0',
-            sodUtc0: '0',
-            sodUtc8: '0',
-            ts: '0',
-            change24h: 0,
-            formattedPrice: '--',
-            loading: false,
-            error: 'Failed to load data'
-          };
-        }
-        
-        const change24h = parseFloat(ticker.last) - parseFloat(ticker.open24h);
-        const changePercent = (change24h / parseFloat(ticker.open24h)) * 100;
-        
-        return {
-          ...ticker,
-          change24h: isNaN(changePercent) ? 0 : changePercent,
-          formattedPrice: parseFloat(ticker.last).toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 8
-          }),
-          loading: false
-        };
-      }));
-      
-      setLastUpdated(new Date());
-    } catch (err) {
-      console.error('[Markets] Error loading market data:', err);
-      setError('Failed to load market data. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+const Markets: React.FC = () => {
+  const [marketData, setMarketData] = useState<DexMarketData[]>([]);
+  const [sparklines, setSparklines] = useState<{ [k: string]: number[] }>({});
+  const [selectedToken, setSelectedToken] = useState<DexToken | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadMarketData();
-    
-    // Set up polling every 30 seconds
-    const intervalId = setInterval(loadMarketData, 30000);
-    return () => clearInterval(intervalId);
+    setLoading(true);
+    fetchBatchTokenPrices(TOKENS).then((data) => {
+      setMarketData(data);
+      Promise.all(
+        TOKENS.map((t) =>
+          fetchCandles(t.chainIndex, t.tokenContractAddress, "1H", 24).then((candles) => ({
+            key: `${t.chainIndex}:${t.tokenContractAddress}`,
+            data: candles.map((c) => parseFloat(c.c)),
+          }))
+        )
+      ).then((all) => {
+        const sparkObj: { [k: string]: number[] } = {};
+        all.forEach((s) => {
+          sparkObj[s.key] = s.data;
+        });
+        setSparklines(sparkObj);
+        setLoading(false);
+      });
+    });
   }, []);
 
-  const handleRefresh = (e: React.MouseEvent) => {
-    e.preventDefault();
-    loadMarketData();
-  };
-
-  if (isLoading && markets.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <Loader2 className="h-12 w-12 animate-spin text-crypto-accent" />
-        <p className="text-lg">Loading market data...</p>
-        <p className="text-sm text-muted-foreground">This may take a moment</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="container mx-auto p-4 md:p-6 max-w-7xl">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Markets</h1>
-          <p className="text-sm text-muted-foreground">
-            Real-time cryptocurrency prices
-            {lastUpdated && (
-              <span className="ml-2">• Updated {lastUpdated.toLocaleTimeString()}</span>
-            )}
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
+      <div className="container mx-auto py-8 max-w-6xl px-4">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+            Markets
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 text-lg">
+            Real-time DeFi token prices, trends, and activity across chains.
           </p>
         </div>
-        <div className="flex flex-wrap gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
-            onClick={handleRefresh}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <RefreshCw className="h-4 w-4" />
-            )}
-            Refresh
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
-            asChild
-          >
-            <Link to="/">
-              <ArrowLeft className="h-4 w-4" />
-              Dashboard
-            </Link>
-          </Button>
-        </div>
-      </div>
-      
-      {error && (
-        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-md flex items-start gap-3">
-          <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
-          <div>
-            <p className="font-medium">Error loading market data</p>
-            <p className="text-sm text-muted-foreground">{error}</p>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="mt-2" 
-              onClick={handleRefresh}
-              disabled={isLoading}
-            >
-              {isLoading ? 'Retrying...' : 'Retry'}
-            </Button>
+
+        {/* Table Container */}
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead className="bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-800 dark:to-gray-700">
+                <tr>
+                  <th className="p-4 text-left font-semibold text-gray-700 dark:text-gray-300">Token</th>
+                  <th className="p-4 text-right font-semibold text-gray-700 dark:text-gray-300">Price</th>
+                  <th className="p-4 text-right font-semibold text-gray-700 dark:text-gray-300">24h Change</th>
+                  <th className="p-4 text-right font-semibold text-gray-700 dark:text-gray-300">Market Cap</th>
+                  <th className="p-4 text-right font-semibold text-gray-700 dark:text-gray-300">24h Volume</th>
+                  <th className="p-4 text-center font-semibold text-gray-700 dark:text-gray-300">Trend</th>
+                  <th className="p-4 text-center font-semibold text-gray-700 dark:text-gray-300">Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                {marketData.map((m, idx) => {
+                  const token = TOKENS[idx];
+                  const sparkKey = `${token.chainIndex}:${token.tokenContractAddress}`;
+                  const priceChange = parseFloat(m.priceChange24H || "0");
+                  
+                  return (
+                    <tr 
+                      key={sparkKey} 
+                      className="border-b border-gray-100 dark:border-gray-800 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-gray-800 dark:hover:to-gray-700 transition-all duration-300"
+                    >
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                            {token.symbol.charAt(0)}
+                          </div>
+                          <div>
+                            <span className="font-bold text-gray-900 dark:text-gray-100">{token.symbol}</span>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">{token.name}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-4 text-right font-mono font-semibold text-gray-900 dark:text-gray-100">
+                        ${parseFloat(m.price).toLocaleString(undefined, { maximumFractionDigits: 6 })}
+                      </td>
+                      <td className={`p-4 text-right font-bold ${
+                        priceChange >= 0 ? "text-green-600" : "text-red-600"
+                      }`}>
+                        <span className={`px-2 py-1 rounded-full text-sm ${
+                          priceChange >= 0 
+                            ? "bg-green-100 dark:bg-green-900/30" 
+                            : "bg-red-100 dark:bg-red-900/30"
+                        }`}>
+                          {priceChange >= 0 ? "+" : ""}{priceChange.toFixed(2)}%
+                        </span>
+                      </td>
+                      <td className="p-4 text-right font-mono text-gray-700 dark:text-gray-300">
+                        {m.marketCap === "N/A" ? (
+                          <span className="text-gray-500">N/A</span>
+                        ) : (
+                          `$${parseFloat(m.marketCap).toLocaleString(undefined, { notation: "compact" })}`
+                        )}
+                      </td>
+                      <td className="p-4 text-right font-mono text-gray-700 dark:text-gray-300">
+                        {m.volume24H === "N/A" ? (
+                          <span className="text-gray-500">N/A</span>
+                        ) : (
+                          `$${parseFloat(m.volume24H).toLocaleString(undefined, { notation: "compact" })}`
+                        )}
+                      </td>
+                      <td className="p-4 text-center">
+                        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-2 inline-block">
+                          <MarketSparkline data={sparklines[sparkKey] || []} />
+                        </div>
+                      </td>
+                      <td className="p-4 text-center">
+                        <button
+                          className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-lg font-medium"
+                          onClick={() => setSelectedToken(token)}
+                        >
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
-        </div>
-      )}
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {markets.map((market) => {
-          const isPositive = market.change24h >= 0;
-          const isLoading = market.loading;
-          const hasError = !!market.error;
           
-          return (
-            <Card 
-              key={market.instId} 
-              className={`bg-secondary/30 transition-all hover:bg-secondary/40 ${
-                isLoading ? 'opacity-70' : ''
-              }`}
-            >
-              <CardContent className="p-4">
-                <div className="flex justify-between items-center mb-3">
-                  <div>
-                    <h3 className="font-medium">{market.instId.replace('-', '/')}</h3>
-                    <p className="text-xl font-bold">
-                      {isLoading ? '...' : hasError ? '--' : `$${market.formattedPrice}`}
-                    </p>
-                  </div>
-                  <div 
-                    className={`text-lg font-bold ${
-                      hasError ? 'text-amber-500' : 
-                      isPositive ? 'text-green-500' : 'text-red-500'
-                    }`}
-                  >
-                    {hasError ? (
-                      <AlertCircle className="h-5 w-5" />
-                    ) : isLoading ? (
-                      '...'
-                    ) : (
-                      `${isPositive ? '+' : ''}${market.change24h.toFixed(2)}%`
-                    )}
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="flex-1"
-                    disabled={isLoading || hasError}
-                    asChild
-                  >
-                    <Link to={`/trading?pair=${market.instId}`}>
-                      Trade
-                    </Link>
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="flex-1"
-                    disabled={isLoading || hasError}
-                    asChild
-                  >
-                    <Link to={`/chart/${market.instId}`}>
-                      Chart
-                    </Link>
-                  </Button>
-                </div>
-                {hasError && (
-                  <p className="mt-2 text-xs text-amber-500 text-center">
-                    {market.error}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })}
+          {loading && (
+            <div className="text-center py-12">
+              <div className="inline-flex items-center gap-3 text-blue-600">
+                <svg className="animate-spin h-6 w-6" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span className="text-lg font-medium">Loading market data...</span>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-      
-      <div className="mt-6 text-center text-sm text-muted-foreground">
-        <p>Data provided by OKX • Updates every 30 seconds</p>
-        <p className="mt-1">
-          {lastUpdated && `Last updated: ${lastUpdated.toLocaleString()}`}
-        </p>
-      </div>
+
+      {selectedToken && (
+        <MarketDetailModal token={selectedToken} onClose={() => setSelectedToken(null)} />
+      )}
     </div>
   );
 };
