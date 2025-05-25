@@ -18,19 +18,31 @@
 
 ## Setup
 
-1) clone the repository
+1. Clone the repository
     ```bash
-        git clone https://github.com/tmanas06/web3-trade-ai.git
+    git clone https://github.com/tmanas06/web3-trade-ai.git
     ```
 
-2) install dependencies
+2. Install dependencies
     ```bash
-        npm install
+    npm install --legacy-peer-deps
     ```
 
-3) run the development server
-    ```bash
-        cd src
-        npm run dev
+3. Create a `.env` file inside the `server/` folder with the following content:
+    ```env
+    # OKX API credentials
+    OKX_API_KEY=
+    OKX_SECRET=
+    OKX_PASSPHRASE=
     ```
 
+4. Run the server
+    ```bash
+    cd server
+    node proxy.js
+    ```
+
+5. Run the development server
+    ```bash
+    npm run dev
+    ```
