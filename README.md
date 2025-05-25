@@ -4,7 +4,7 @@
 
 - Connect to Phantom wallet
 - View wallet balance and transactions
-- 
+- View market cap and trend via Okx Dex Market API
 
 ## Tech Stack
 
