@@ -193,6 +193,54 @@ export interface TransactionHistoryResponse {
   gasPrice: string;
   txFee: string;
 }
+export interface SupportedBlockchain {
+  name: string;
+  logoUrl: string;
+  shortName: string;
+  chainIndex: string;
+}
+
+// Interface for total value response
+export interface TotalValueByAddress {
+  totalValue: string; // USD value as string
+}
+
+// Interface for a single token asset
+export interface TokenAsset {
+  chainIndex: string;
+  tokenAddress: string;
+  address: string;
+  symbol: string;
+  balance: string;
+  rawBalance: string;
+  tokenPrice: string;
+  tokenType: string; // "1" = token, "2" = inscription
+  transferAmount: string;
+  availableAmount: string;
+  isRiskToken: boolean;
+}
+
+// Interface for the token address input
+export interface TokenAddressQuery {
+  chainIndex: string;
+  tokenAddress: string; // "" for native, or contract address
+}
+
+// Interface for a single token asset (already defined)
+export interface TokenAsset {
+  chainIndex: string;
+  tokenAddress: string;
+  address: string;
+  symbol: string;
+  balance: string;
+  rawBalance: string;
+  tokenPrice: string;
+  tokenType: string;
+  transferAmount: string;
+  availableAmount: string;
+  isRiskToken: boolean;
+}
+
 
 export const OKX_BASE = 'http://localhost:3001';
 
@@ -606,4 +654,135 @@ export async function fetchTransactionHistory(params: {
   console.log('[fetchTransactionHistory] Raw response:', data);
 
   return data.data as TransactionHistoryResponse;
+}
+
+// Fetch all supported blockchains
+export async function fetchSupportedBlockchains(): Promise<SupportedBlockchain[]> {
+  const requestPath = '/wallet/chain/supported-chains';
+  const res = await fetch(`${OKX_BASE}${requestPath}`, {
+    headers: { 'Content-Type': 'application/json' }
+  });
+  console.log('[fetchSupportedBlockchains] Response status:', res.status);
+
+  if (!res.ok) {
+    const errorBody = await res.text();
+    console.error('[fetchSupportedBlockchains] API Error:', {
+      status: res.status,
+      statusText: res.statusText,
+      url: res.url,
+      errorBody,
+    });
+    throw new Error(`API Error: ${res.status} ${res.statusText}`);
+  }
+
+  const data = await res.json();
+  console.log('[fetchSupportedBlockchains] Raw data:', data);
+
+  return (data.data || []) as SupportedBlockchain[];
+}
+
+// Fetch total value of all tokens/DeFi assets for a given address and chains
+export async function fetchTotalValueByAddress(
+  address: string,
+  chains: string,
+  assetType: string = '0',
+  excludeRiskToken: boolean = true
+): Promise<TotalValueByAddress> {
+  const params = new URLSearchParams({
+    address,
+    chains,
+    assetType,
+    excludeRiskToken: excludeRiskToken.toString()
+  });
+
+  const requestPath = `/wallet/asset/total-value-by-address?${params}`;
+  const res = await fetch(`${OKX_BASE}${requestPath}`, {
+    headers: { 'Content-Type': 'application/json' }
+  });
+
+  console.log('[fetchTotalValueByAddress] Response status:', res.status);
+
+  if (!res.ok) {
+    const errorBody = await res.text();
+    console.error('[fetchTotalValueByAddress] API Error:', {
+      status: res.status,
+      statusText: res.statusText,
+      url: res.url,
+      errorBody,
+    });
+    throw new Error(`API Error: ${res.status} ${res.statusText}`);
+  }
+
+  const data = await res.json();
+  console.log('[fetchTotalValueByAddress] Raw data:', data);
+
+  // Return the first item in the data array (API returns data: [{ totalValue: ... }])
+  return (data.data?.[0] || { totalValue: '0' }) as TotalValueByAddress;
+}
+
+// Fetch all token balances for an address across chains
+export async function fetchAllTokenBalancesByAddress(
+  address: string,
+  chains: string, // comma-separated chain indices, e.g. "1,137"
+  filter: string = "0" // "0" = filter risky tokens, "1" = do not filter
+): Promise<TokenAsset[]> {
+  const params = new URLSearchParams({
+    address,
+    chains,
+    filter
+  });
+
+  const requestPath = `/wallet/asset/all-token-balances-by-address?${params}`;
+  const res = await fetch(`${OKX_BASE}${requestPath}`, {
+    headers: { 'Content-Type': 'application/json' }
+  });
+
+  console.log('[fetchAllTokenBalancesByAddress] Response status:', res.status);
+
+  if (!res.ok) {
+    const errorBody = await res.text();
+    console.error('[fetchAllTokenBalancesByAddress] API Error:', {
+      status: res.status,
+      statusText: res.statusText,
+      url: res.url,
+      errorBody,
+    });
+    throw new Error(`API Error: ${res.status} ${res.statusText}`);
+  }
+
+  const data = await res.json();
+  console.log('[fetchAllTokenBalancesByAddress] Raw data:', data);
+
+  // API returns data: [{ tokenAssets: [...] }]
+  return (data.data?.[0]?.tokenAssets || []) as TokenAsset[];
+}
+
+// Fetch specific token balances for an address
+export async function fetchSpecificTokenBalances(
+  address: string,
+  tokenAddresses: TokenAddressQuery[],
+  filter: string = "0"
+): Promise<TokenAsset[]> {
+  const res = await fetch(`${OKX_BASE}/wallet/asset/token-balances-by-address`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ address, tokenAddresses, filter }),
+  });
+
+  console.log('[fetchSpecificTokenBalances] Response status:', res.status);
+
+  if (!res.ok) {
+    const errorBody = await res.text();
+    console.error('[fetchSpecificTokenBalances] API Error:', {
+      status: res.status,
+      statusText: res.statusText,
+      url: res.url,
+      errorBody,
+    });
+    throw new Error(`API Error: ${res.status} ${res.statusText}\n${errorBody}`);
+  }
+
+  const data = await res.json();
+  // API returns data: [{ tokenAssets: [...] }]
+  return (data.data?.[0]?.tokenAssets || []) as TokenAsset[];
 }
