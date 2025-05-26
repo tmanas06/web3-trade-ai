@@ -46,9 +46,9 @@ const menuItems = [
     path: "/trading"
   },
   {
-    title: "Assets",
+    title: "Swap",
     icon: Bitcoin,
-    path: "/assets"
+    path: "/swap"
   },
   {
     title: "Network",

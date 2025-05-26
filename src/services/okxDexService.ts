@@ -7,6 +7,13 @@ export interface DexToken {
   name: string;
   logo?: string;
 }
+export interface AggregatorToken {
+  decimals: string;
+  tokenContractAddress: string;
+  tokenLogoUrl: string;
+  tokenName: string;
+  tokenSymbol: string;
+}
 
 export interface DexMarketData {
   chainIndex: string;
@@ -46,6 +53,145 @@ export interface DexTrade {
   price: string;
   volume: string;
   time: string;
+}
+
+export interface SupportedChain {
+  chainIndex: string;
+  chainId: string;
+  chainName: string;
+  dexTokenApproveAddress: string;
+}
+export interface LiquiditySource {
+  id: string;
+  name: string;
+  logo: string;
+}
+
+export interface ApproveTransactionData {
+  data: string;
+  dexContractAddress: string;
+  gasLimit: string;
+  gasPrice: string;
+}
+
+// Solana Swap Instruction Account Info
+export interface SolanaSwapInstructionAccount {
+  isSigner: boolean;
+  isWritable: boolean;
+  pubkey: string;
+}
+
+// Solana Swap Instruction
+export interface SolanaSwapInstruction {
+  data: string;
+  accounts: SolanaSwapInstructionAccount[];
+  programId: string;
+}
+
+// Solana Swap Instruction Response
+export interface SolanaSwapInstructionResponse {
+  addressLookupTableAddresses: string[];
+  instructionLists: SolanaSwapInstruction[];
+}
+// Quote Response Interfaces
+export interface DexProtocol {
+  dexName: string;
+  percent: string;
+}
+
+export interface SubRouter {
+  dexProtocol: DexProtocol[];
+  fromToken: DexToken;
+  toToken: DexToken;
+}
+
+export interface DexRouter {
+  router: string;
+  routerPercent: string;
+  subRouterList: SubRouter[];
+}
+
+export interface QuoteCompare {
+  dexName: string;
+  dexLogo: string;
+  tradeFee: string;
+  amountOut: string;
+  priceImpactPercentage: string;
+}
+
+export interface DexQuoteResponse {
+  chainIndex: string;
+  chainId: string;
+  dexRouterList: DexRouter[];
+  estimateGasFee: string;
+  fromToken: DexToken;
+  fromTokenAmount: string;
+  originToTokenAmount: string;
+  priceImpactPercentage: string;
+  quoteCompareList: QuoteCompare[];
+  toToken: DexToken;
+  toTokenAmount: string;
+  tradeFee: string;
+}
+
+// Swap Transaction Data Interface
+export interface SwapTxData {
+  data: string;
+  from: string;
+  gas: string;
+  gasPrice: string;
+  maxPriorityFeePerGas?: string;
+  minReceiveAmount: string;
+  signatureData: string[];
+  to: string;
+  value: string;
+}
+
+// Full Swap Response Interface
+export interface SwapResponse {
+  routerResult: {
+    chainIndex: string;
+    chainId: string;
+    dexRouterList: DexRouter[];
+    estimateGasFee: string;
+    fromToken: DexToken;
+    fromTokenAmount: string;
+    priceImpactPercentage: string;
+    quoteCompareList: QuoteCompare[];
+    toToken: DexToken;
+    toTokenAmount: string;
+    tradeFee: string;
+  };
+  tx: SwapTxData;
+}
+
+// Transaction Token Details Interface
+export interface TransactionTokenDetails {
+  amount: string;
+  symbol: string;
+  tokenAddress: string;
+}
+
+// Transaction History Response Interface
+export interface TransactionHistoryResponse {
+  chainIndex: string;
+  chainId: string;
+  txHash: string;
+  height: string;
+  txTime: string;
+  status: 'pending' | 'success' | 'fail';
+  txType: 'Approve' | 'Wrap' | 'Unwrap' | 'Swap';
+  fromAddress: string;
+  dexRouter: string;
+  toAddress: string;
+  fromTokenDetails: TransactionTokenDetails;
+  toTokenDetails: TransactionTokenDetails;
+  referralAmount: string;
+  errorMsg: string;
+  gasLimit: string;
+  gasUsed: string;
+  gasPrice: string;
+  txFee: string;
 }
 
 export const OKX_BASE = 'http://localhost:3001';
@@ -198,4 +344,266 @@ export async function fetchTrades(
       time: new Date(parseInt(item.time)).toISOString(),
     };
   });
+}
+export async function fetchSupportedChains(chainIndex?: string): Promise<SupportedChain[]> {
+  const params = new URLSearchParams();
+  if (chainIndex) params.append('chainIndex', chainIndex);
+
+  const requestPath = `/dex/aggregator/supported/chain${params.toString() ? '?' + params.toString() : ''}`;
+
+  console.log('[fetchSupportedChains] Request URL:', `${OKX_BASE}${requestPath}`);
+
+  const res = await fetch(`${OKX_BASE}${requestPath}`);
+  console.log('[fetchSupportedChains] Response status:', res.status);
+
+  if (!res.ok) {
+    const errorBody = await res.text();
+    console.error('[fetchSupportedChains] API Error:', {
+      status: res.status,
+      statusText: res.statusText,
+      url: res.url,
+      errorBody,
+    });
+    throw new Error(`API Error: ${res.status} ${res.statusText}`);
+  }
+
+  const data = await res.json();
+  console.log('[fetchSupportedChains] Raw data:', data);
+
+  return (data.data || []) as SupportedChain[];
+}
+
+export async function fetchAllTokens(chainIndex: string): Promise<AggregatorToken[]> {
+  const params = new URLSearchParams({ chainIndex });
+  const requestPath = `/dex/aggregator/all-tokens?${params}`;
+
+  console.log('[fetchAllTokens] Request URL:', `${OKX_BASE}${requestPath}`);
+
+  const res = await fetch(`${OKX_BASE}${requestPath}`);
+  console.log('[fetchAllTokens] Response status:', res.status);
+
+  if (!res.ok) {
+    const errorBody = await res.text();
+    console.error('[fetchAllTokens] API Error:', {
+      status: res.status,
+      statusText: res.statusText,
+      url: res.url,
+      errorBody,
+    });
+    throw new Error(`API Error: ${res.status} ${res.statusText}`);
+  }
+
+  const data = await res.json();
+  console.log('[fetchAllTokens] Raw data:', data);
+
+  return (data.data || []) as AggregatorToken[];
+}
+
+
+// Fetch all liquidity sources for a given chainIndex
+export async function fetchLiquiditySources(chainIndex: string): Promise<LiquiditySource[]> {
+  const params = new URLSearchParams({ chainIndex });
+  const requestPath = `/dex/aggregator/get-liquidity?${params}`;
+
+  console.log('[fetchLiquiditySources] Request URL:', `${OKX_BASE}${requestPath}`);
+
+  const res = await fetch(`${OKX_BASE}${requestPath}`);
+  console.log('[fetchLiquiditySources] Response status:', res.status);
+
+  if (!res.ok) {
+    const errorBody = await res.text();
+    console.error('[fetchLiquiditySources] API Error:', {
+      status: res.status,
+      statusText: res.statusText,
+      url: res.url,
+      errorBody,
+    });
+    throw new Error(`API Error: ${res.status} ${res.statusText}`);
+  }
+
+  const data = await res.json();
+  console.log('[fetchLiquiditySources] Raw data:', data);
+
+  return (data.data || []) as LiquiditySource[];
+}
+
+// Fetch ERC-20 Approval Transaction Data
+export async function fetchApproveTransaction(
+  chainIndex: string,
+  tokenContractAddress: string,
+  approveAmount: string
+): Promise<ApproveTransactionData> {
+  const params = new URLSearchParams({
+    chainIndex,
+    tokenContractAddress,
+    approveAmount
+  });
+
+  const requestPath = `/dex/aggregator/approve-transaction?${params}`;
+
+  console.log('[fetchApproveTransaction] Request:', requestPath);
+
+  const res = await fetch(`${OKX_BASE}${requestPath}`);
+  console.log('[fetchApproveTransaction] Response status:', res.status);
+
+  if (!res.ok) {
+    const errorBody = await res.text();
+    console.error('[fetchApproveTransaction] API Error:', {
+      status: res.status,
+      statusText: res.statusText,
+      url: res.url,
+      errorBody,
+    });
+    throw new Error(`Approval Error: ${res.status} ${res.statusText}`);
+  }
+
+  const data = await res.json();
+  console.log('[fetchApproveTransaction] Response data:', data);
+
+  // Return first item from array response
+  return (data.data?.[0] || {}) as ApproveTransactionData;
+}
+
+// Fetch Solana swap instructions for a given swap
+export async function fetchSolanaSwapInstructions(params: {
+  chainIndex: string;
+  amount: string;
+  fromTokenAddress: string;
+  toTokenAddress: string;
+  slippage: string;
+  userWalletAddress: string;
+  [key: string]: string | undefined;
+}): Promise<SolanaSwapInstructionResponse> {
+  const urlParams = new URLSearchParams(params as Record<string, string>);
+  const requestPath = `/dex/aggregator/swap-instruction?${urlParams}`;
+
+  console.log('[fetchSolanaSwapInstructions] Request URL:', `${OKX_BASE}${requestPath}`);
+
+  const res = await fetch(`${OKX_BASE}${requestPath}`);
+  console.log('[fetchSolanaSwapInstructions] Response status:', res.status);
+
+  if (!res.ok) {
+    const errorBody = await res.text();
+    console.error('[fetchSolanaSwapInstructions] API Error:', {
+      status: res.status,
+      statusText: res.statusText,
+      url: res.url,
+      errorBody,
+    });
+    throw new Error(`API Error: ${res.status} ${res.statusText}`);
+  }
+
+  const data = await res.json();
+  console.log('[fetchSolanaSwapInstructions] Raw data:', data);
+
+  return data.data as SolanaSwapInstructionResponse;
+}
+// Fetch Swap Quote
+export async function fetchQuote(params: {
+  chainIndex: string;
+  amount: string;
+  fromTokenAddress: string;
+  toTokenAddress: string;
+  dexIds?: string;
+  priceImpactProtectionPercentage?: string;
+  feePercent?: string;
+}): Promise<DexQuoteResponse> {
+  const urlParams = new URLSearchParams(params as Record<string, string>);
+  const requestPath = `/dex/aggregator/quote?${urlParams}`;
+
+  console.log('[fetchQuote] Requesting quote:', urlParams.toString());
+
+  const res = await fetch(`${OKX_BASE}${requestPath}`);
+  console.log('[fetchQuote] Response status:', res.status);
+
+  if (!res.ok) {
+    const errorBody = await res.text();
+    console.error('[fetchQuote] API Error:', {
+      status: res.status,
+      statusText: res.statusText,
+      url: res.url,
+      errorBody,
+    });
+    throw new Error(`Quote Error: ${res.status} ${res.statusText}`);
+  }
+
+  const data = await res.json();
+  console.log('[fetchQuote] Raw response:', data);
+
+  // Return first item from array response
+  return data.data?.[0] as DexQuoteResponse;
+}
+
+// Execute Swap
+export async function fetchSwap(params: {
+  chainIndex: string;
+  amount: string;
+  fromTokenAddress: string;
+  toTokenAddress: string;
+  slippage: string;
+  userWalletAddress: string;
+  swapReceiverAddress?: string;
+  feePercent?: string;
+  gasLevel?: 'average' | 'fast' | 'slow';
+  // ... other optional params
+}): Promise<SwapResponse> {
+  const urlParams = new URLSearchParams(params as Record<string, string>);
+  const requestPath = `/dex/aggregator/swap?${urlParams}`;
+
+  console.log('[fetchSwap] Requesting swap:', urlParams.toString());
+
+  const res = await fetch(`${OKX_BASE}${requestPath}`);
+  console.log('[fetchSwap] Response status:', res.status);
+
+  if (!res.ok) {
+    const errorBody = await res.text();
+    console.error('[fetchSwap] API Error:', {
+      status: res.status,
+      statusText: res.statusText,
+      url: res.url,
+      errorBody,
+    });
+    throw new Error(`Swap Error: ${res.status} ${res.statusText}`);
+  }
+
+  const data = await res.json();
+  console.log('[fetchSwap] Raw response:', data);
+
+  return data.data?.[0] as SwapResponse;
+}
+
+// Fetch Transaction History
+export async function fetchTransactionHistory(params: {
+  chainIndex: string;
+  txHash: string;
+  isFromMyProject?: boolean;
+}): Promise<TransactionHistoryResponse> {
+ const urlParams = new URLSearchParams();
+  urlParams.append('chainIndex', params.chainIndex);
+  urlParams.append('txHash', params.txHash);
+  
+  if (typeof params.isFromMyProject !== 'undefined') {
+    urlParams.append('isFromMyProject', params.isFromMyProject.toString());
+  }  const requestPath = `/dex/aggregator/history?${urlParams}`;
+
+  console.log('[fetchTransactionHistory] Requesting history:', urlParams.toString());
+
+  const res = await fetch(`${OKX_BASE}${requestPath}`);
+  console.log('[fetchTransactionHistory] Response status:', res.status);
+
+  if (!res.ok) {
+    const errorBody = await res.text();
+    console.error('[fetchTransactionHistory] API Error:', {
+      status: res.status,
+      statusText: res.statusText,
+      url: res.url,
+      errorBody,
+    });
+    throw new Error(`Transaction History Error: ${res.status} ${res.statusText}`);
+  }
+
+  const data = await res.json();
+  console.log('[fetchTransactionHistory] Raw response:', data);
+
+  return data.data as TransactionHistoryResponse;
 }

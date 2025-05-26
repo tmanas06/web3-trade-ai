@@ -173,6 +173,353 @@ app.get('/dex/market/trades', async (req, res) => {
   }
 });
 
+// Get supported chains for aggregator
+
+app.get('/dex/aggregator/supported/chain', async (req, res) => {
+  console.log('\n📨 Received GET /dex/aggregator/supported/chain');
+  try {
+    const timestamp = new Date().toISOString();
+    const method = 'GET';
+    const query = new URLSearchParams(req.query).toString();
+    const requestPath = `/api/v5/dex/aggregator/supported/chain${query ? '?' + query : ''}`;
+
+    console.log('🔧 Constructing OKX request:');
+    console.log('- Full URL:', `${OKX_BASE}/aggregator/supported/chain${query ? '?' + query : ''}`);
+
+    const headers = {
+      'OK-ACCESS-KEY': process.env.OKX_API_KEY || 'MISSING_API_KEY',
+      'OK-ACCESS-SIGN': '***CALCULATING***',
+      'OK-ACCESS-PASSPHRASE': process.env.OKX_PASSPHRASE || 'MISSING_PASSPHRASE',
+      'OK-ACCESS-TIMESTAMP': timestamp
+    };
+
+    const signature = createSignature(timestamp, method, requestPath, '', process.env.OKX_SECRET);
+    headers['OK-ACCESS-SIGN'] = signature;
+
+    const response = await fetch(`${OKX_BASE}/aggregator/supported/chain${query ? '?' + query : ''}`, { headers });
+
+    console.log('📡 OKX Response Status:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ OKX API Error:', errorText);
+      return res.status(response.status).json({ error: `OKX Error: ${errorText}` });
+    }
+
+    const data = await response.json();
+    console.log('✅ OKX Response Data:', JSON.stringify(data, null, 2).substring(0, 200) + '...');
+
+    res.json(data);
+  } catch (err) {
+    console.error('🔥 Proxy Error:', err);
+    res.status(500).json({ error: 'Proxy Error', details: err.message });
+  }
+});
+
+// Proxy endpoint for fetching all tokens on a chain
+app.get('/dex/aggregator/all-tokens', async (req, res) => {
+  console.log('\n📨 Received GET /dex/aggregator/all-tokens');
+  try {
+    const timestamp = new Date().toISOString();
+    const method = 'GET';
+    const query = new URLSearchParams(req.query).toString();
+    const requestPath = `/api/v5/dex/aggregator/all-tokens${query ? '?' + query : ''}`;
+
+    console.log('🔧 Constructing OKX request:');
+    console.log('- Full URL:', `${OKX_BASE}/aggregator/all-tokens${query ? '?' + query : ''}`);
+
+    const headers = {
+      'OK-ACCESS-KEY': process.env.OKX_API_KEY || 'MISSING_API_KEY',
+      'OK-ACCESS-SIGN': '***CALCULATING***',
+      'OK-ACCESS-PASSPHRASE': process.env.OKX_PASSPHRASE || 'MISSING_PASSPHRASE',
+      'OK-ACCESS-TIMESTAMP': timestamp
+    };
+
+    const signature = createSignature(timestamp, method, requestPath, '', process.env.OKX_SECRET);
+    headers['OK-ACCESS-SIGN'] = signature;
+
+    const response = await fetch(`${OKX_BASE}/aggregator/all-tokens${query ? '?' + query : ''}`, { headers });
+
+    console.log('📡 OKX Response Status:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ OKX API Error:', errorText);
+      return res.status(response.status).json({ error: `OKX Error: ${errorText}` });
+    }
+
+    const data = await response.json();
+    console.log('✅ OKX Response Data:', JSON.stringify(data, null, 2).substring(0, 200) + '...');
+
+    res.json(data);
+  } catch (err) {
+    console.error('🔥 Proxy Error:', err);
+    res.status(500).json({ error: 'Proxy Error', details: err.message });
+  }
+});
+// Proxy endpoint for fetching liquidity sources
+app.get('/dex/aggregator/get-liquidity', async (req, res) => {
+  console.log('\n📨 Received GET /dex/aggregator/get-liquidity');
+  try {
+    const timestamp = new Date().toISOString();
+    const method = 'GET';
+    const query = new URLSearchParams(req.query).toString();
+    const requestPath = `/api/v5/dex/aggregator/get-liquidity${query ? '?' + query : ''}`;
+
+    console.log('🔧 Constructing OKX request:');
+    console.log('- Full URL:', `${OKX_BASE}/aggregator/get-liquidity${query ? '?' + query : ''}`);
+
+    const headers = {
+      'OK-ACCESS-KEY': process.env.OKX_API_KEY || 'MISSING_API_KEY',
+      'OK-ACCESS-SIGN': '***CALCULATING***',
+      'OK-ACCESS-PASSPHRASE': process.env.OKX_PASSPHRASE || 'MISSING_PASSPHRASE',
+      'OK-ACCESS-TIMESTAMP': timestamp
+    };
+
+    const signature = createSignature(timestamp, method, requestPath, '', process.env.OKX_SECRET);
+    headers['OK-ACCESS-SIGN'] = signature;
+
+    const response = await fetch(`${OKX_BASE}/aggregator/get-liquidity${query ? '?' + query : ''}`, { headers });
+
+    console.log('📡 OKX Response Status:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ OKX API Error:', errorText);
+      return res.status(response.status).json({ error: `OKX Error: ${errorText}` });
+    }
+
+    const data = await response.json();
+    console.log('✅ OKX Response Data:', JSON.stringify(data, null, 2).substring(0, 200) + '...');
+
+    res.json(data);
+  } catch (err) {
+    console.error('🔥 Proxy Error:', err);
+    res.status(500).json({ error: 'Proxy Error', details: err.message });
+  }
+});
+
+// Approve Transaction Proxy
+app.get('/dex/aggregator/approve-transaction', async (req, res) => {
+  console.log('\n📨 Received GET /dex/aggregator/approve-transaction');
+  try {
+    const { chainIndex, tokenContractAddress, approveAmount } = req.query;
+    
+    console.log('🔍 Query Parameters:', {
+      chainIndex,
+      tokenContractAddress: tokenContractAddress?.substring(0, 15) + '...',
+      approveAmount
+    });
+
+    const timestamp = new Date().toISOString();
+    const method = 'GET';
+    const query = new URLSearchParams(req.query).toString();
+    const requestPath = `/api/v5/dex/aggregator/approve-transaction?${query}`;
+
+    console.log('🔧 Constructing OKX request:');
+    console.log('- Full URL:', `${OKX_BASE}/aggregator/approve-transaction?${query}`);
+
+    const headers = {
+      'OK-ACCESS-KEY': process.env.OKX_API_KEY || 'MISSING_API_KEY',
+      'OK-ACCESS-SIGN': '***CALCULATING***',
+      'OK-ACCESS-PASSPHRASE': process.env.OKX_PASSPHRASE || 'MISSING_PASSPHRASE',
+      'OK-ACCESS-TIMESTAMP': timestamp
+    };
+
+    const signature = createSignature(timestamp, method, requestPath, '', process.env.OKX_SECRET);
+    headers['OK-ACCESS-SIGN'] = signature;
+
+    const response = await fetch(`${OKX_BASE}/aggregator/approve-transaction?${query}`, { headers });
+
+    console.log('📡 OKX Response Status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ OKX API Error:', errorText);
+      return res.status(response.status).json({ error: `OKX Error: ${errorText}` });
+    }
+
+    const data = await response.json();
+    console.log('✅ OKX Response Data:', JSON.stringify(data, null, 2).substring(0, 200) + '...');
+
+    res.json(data);
+  } catch (err) {
+    console.error('🔥 Proxy Error:', err);
+    res.status(500).json({ error: 'Proxy Error', details: err.message });
+  }
+});
+
+// Proxy endpoint for Solana swap instructions
+app.get('/dex/aggregator/swap-instruction', async (req, res) => {
+  console.log('\n📨 Received GET /dex/aggregator/swap-instruction');
+  try {
+    const timestamp = new Date().toISOString();
+    const method = 'GET';
+    const query = new URLSearchParams(req.query).toString();
+    const requestPath = `/api/v5/dex/aggregator/swap-instruction${query ? '?' + query : ''}`;
+
+    console.log('🔧 Constructing OKX request:');
+    console.log('- Full URL:', `${OKX_BASE}/aggregator/swap-instruction${query ? '?' + query : ''}`);
+
+    const headers = {
+      'OK-ACCESS-KEY': process.env.OKX_API_KEY || 'MISSING_API_KEY',
+      'OK-ACCESS-SIGN': '***CALCULATING***',
+      'OK-ACCESS-PASSPHRASE': process.env.OKX_PASSPHRASE || 'MISSING_PASSPHRASE',
+      'OK-ACCESS-TIMESTAMP': timestamp
+    };
+
+    const signature = createSignature(timestamp, method, requestPath, '', process.env.OKX_SECRET);
+    headers['OK-ACCESS-SIGN'] = signature;
+
+    const response = await fetch(`${OKX_BASE}/aggregator/swap-instruction${query ? '?' + query : ''}`, { headers });
+
+    console.log('📡 OKX Response Status:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ OKX API Error:', errorText);
+      return res.status(response.status).json({ error: `OKX Error: ${errorText}` });
+    }
+
+    const data = await response.json();
+    console.log('✅ OKX Response Data:', JSON.stringify(data, null, 2).substring(0, 200) + '...');
+
+    res.json(data);
+  } catch (err) {
+    console.error('🔥 Proxy Error:', err);
+    res.status(500).json({ error: 'Proxy Error', details: err.message });
+  }
+});
+
+//Get quote
+// Quote Proxy Endpoint
+app.get('/dex/aggregator/quote', async (req, res) => {
+  console.log('\n📨 Received GET /dex/aggregator/quote');
+  try {
+    const timestamp = new Date().toISOString();
+    const method = 'GET';
+    const query = new URLSearchParams(req.query).toString();
+    const requestPath = `/api/v5/dex/aggregator/quote${query ? '?' + query : ''}`;
+
+    console.log('🔧 Constructing OKX request:');
+    console.log('- Full URL:', `${OKX_BASE}/aggregator/quote${query ? '?' + query : ''}`);
+
+    const headers = {
+      'OK-ACCESS-KEY': process.env.OKX_API_KEY || 'MISSING_API_KEY',
+      'OK-ACCESS-SIGN': '***CALCULATING***',
+      'OK-ACCESS-PASSPHRASE': process.env.OKX_PASSPHRASE || 'MISSING_PASSPHRASE',
+      'OK-ACCESS-TIMESTAMP': timestamp
+    };
+
+    const signature = createSignature(timestamp, method, requestPath, '', process.env.OKX_SECRET);
+    headers['OK-ACCESS-SIGN'] = signature;
+
+    const response = await fetch(`${OKX_BASE}/aggregator/quote${query ? '?' + query : ''}`, { headers });
+
+    console.log('📡 OKX Response Status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ OKX API Error:', errorText);
+      return res.status(response.status).json({ error: `OKX Error: ${errorText}` });
+    }
+
+    const data = await response.json();
+    console.log('✅ OKX Response Data:', JSON.stringify(data, null, 2).substring(0, 200) + '...');
+
+    res.json(data);
+  } catch (err) {
+    console.error('🔥 Proxy Error:', err);
+    res.status(500).json({ error: 'Proxy Error', details: err.message });
+  }
+});
+
+// Swap Proxy Endpoint
+app.get('/dex/aggregator/swap', async (req, res) => {
+  console.log('\n📨 Received GET /dex/aggregator/swap');
+  try {
+    const timestamp = new Date().toISOString();
+    const method = 'GET';
+    const query = new URLSearchParams(req.query).toString();
+    const requestPath = `/api/v5/dex/aggregator/swap${query ? '?' + query : ''}`;
+
+    console.log('🔧 Constructing OKX request:');
+    console.log('- Full URL:', `${OKX_BASE}/aggregator/swap${query ? '?' + query : ''}`);
+    console.log('- Query Params:', req.query);
+
+    const headers = {
+      'OK-ACCESS-KEY': process.env.OKX_API_KEY || 'MISSING_API_KEY',
+      'OK-ACCESS-SIGN': '***CALCULATING***',
+      'OK-ACCESS-PASSPHRASE': process.env.OKX_PASSPHRASE || 'MISSING_PASSPHRASE',
+      'OK-ACCESS-TIMESTAMP': timestamp
+    };
+
+    const signature = createSignature(timestamp, method, requestPath, '', process.env.OKX_SECRET);
+    headers['OK-ACCESS-SIGN'] = signature;
+
+    const response = await fetch(`${OKX_BASE}/aggregator/swap${query ? '?' + query : ''}`, { headers });
+
+    console.log('📡 OKX Response Status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ OKX API Error:', errorText);
+      return res.status(response.status).json({ error: `OKX Error: ${errorText}` });
+    }
+
+    const data = await response.json();
+    console.log('✅ OKX Response Data:', JSON.stringify(data, null, 2).substring(0, 200) + '...');
+
+    res.json(data);
+  } catch (err) {
+    console.error('🔥 Proxy Error:', err);
+    res.status(500).json({ error: 'Proxy Error', details: err.message });
+  }
+});
+
+// History Proxy Endpoint
+app.get('/dex/aggregator/history', async (req, res) => {
+  console.log('\n📨 Received GET /dex/aggregator/history');
+  try {
+    const timestamp = new Date().toISOString();
+    const method = 'GET';
+    const query = new URLSearchParams(req.query).toString();
+    const requestPath = `/api/v5/dex/aggregator/history${query ? '?' + query : ''}`;
+
+    console.log('🔧 Constructing OKX request:');
+    console.log('- Full URL:', `${OKX_BASE}/aggregator/history${query ? '?' + query : ''}`);
+
+    const headers = {
+      'OK-ACCESS-KEY': process.env.OKX_API_KEY || 'MISSING_API_KEY',
+      'OK-ACCESS-SIGN': '***CALCULATING***',
+      'OK-ACCESS-PASSPHRASE': process.env.OKX_PASSPHRASE || 'MISSING_PASSPHRASE',
+      'OK-ACCESS-TIMESTAMP': timestamp
+    };
+
+    const signature = createSignature(timestamp, method, requestPath, '', process.env.OKX_SECRET);
+    headers['OK-ACCESS-SIGN'] = signature;
+
+    const response = await fetch(`${OKX_BASE}/aggregator/history${query ? '?' + query : ''}`, { headers });
+
+    console.log('📡 OKX Response Status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ OKX API Error:', errorText);
+      return res.status(response.status).json({ error: `OKX Error: ${errorText}` });
+    }
+
+    const data = await response.json();
+    console.log('✅ OKX Response Data:', JSON.stringify(data, null, 2).substring(0, 200) + '...');
+
+    res.json(data);
+  } catch (err) {
+    console.error('🔥 Proxy Error:', err);
+    res.status(500).json({ error: 'Proxy Error', details: err.message });
+  }
+});
+
+
 app.listen(PORT, () => {
   console.log(`\n🚀 Proxy running at http://localhost:${PORT}`);
   console.log('🔒 Authentication Status:', 

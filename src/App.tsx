@@ -8,7 +8,7 @@ import NotFound from "./pages/NotFound";
 import Markets from "./pages/Markets";
 import Wallet from "./pages/Wallet";
 import Trading from "./pages/Trading";
-import Assets from "./pages/Assets";
+import Swap from "./pages/Swap";
 import Network from "./pages/Network";
 import Data from "./pages/Data";
 import Settings from "./pages/Settings";
@@ -68,10 +68,10 @@ const App = () => (
               } 
             />
             <Route 
-              path="/assets" 
+              path="/swap" 
               element={
                 <Layout>
-                  <Assets />
+                  <Swap />
                 </Layout>
               } 
             />
