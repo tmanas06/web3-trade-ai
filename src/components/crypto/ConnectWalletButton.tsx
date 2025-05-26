@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react";
+const SENSAY_API_BASE = "https://api.sensay.io/v1/users";
+const SENSAY_API_VERSION = "2025-03-25";
+const SENSAY_ORG_SECRET = import.meta.env.VITE_SENSAY_ORG_SECRET as string;
 
 const ConnectInjectedWallet: React.FC = () => {
   const [publicKey, setPublicKey] = useState<string | null>(null);
@@ -21,6 +24,56 @@ const ConnectInjectedWallet: React.FC = () => {
     checkConnection();
   }, []);
 
+   // Sensay user check/create logic
+const handleSensayUser = async (walletAddress: string) => {
+    try {
+      // 1. Check if user exists
+      const checkResponse = await fetch(`${SENSAY_API_BASE}/${walletAddress}`, {
+        headers: {
+          "X-ORGANIZATION-SECRET": SENSAY_ORG_SECRET,
+          "X-API-Version": SENSAY_API_VERSION,
+        },
+      });
+
+      if (checkResponse.status === 200) {
+        console.log("[Sensay] User exists.");
+        return true;
+      }
+
+      // 2. If not found (404), create user
+      if (checkResponse.status === 404) {
+        const requestBody = {
+          name: walletAddress,
+          id: walletAddress,
+          linkedAccounts: []
+        };
+
+        const createResponse = await fetch(SENSAY_API_BASE, {
+          method: "POST",
+          headers: {
+            "X-ORGANIZATION-SECRET": SENSAY_ORG_SECRET,
+            "Content-Type": "application/json",
+            "X-API-Version": SENSAY_API_VERSION,
+          },
+          body: JSON.stringify(requestBody),
+        });
+
+        if (createResponse.ok) {
+          console.log("[Sensay] User created.");
+          return true;
+        } else {
+          console.error("[Sensay] User creation failed.", await createResponse.text());
+        }
+      } else {
+        console.error("[Sensay] Unexpected response:", checkResponse.status);
+      }
+    } catch (error) {
+      console.error("[Sensay] Error checking/creating user:", error);
+    }
+    return false;
+  };
+
+
   const handleConnect = async () => {
     try {
       if (!window.okxwallet?.solana) {
@@ -39,11 +92,23 @@ const ConnectInjectedWallet: React.FC = () => {
       console.log("[OKX] Attempting to connect...");
       const response = await window.okxwallet.solana.connect();
       console.log("[OKX] Connected:", response?.publicKey?.toBase58?.());
+      
+const pubKey = response.publicKey.toBase58();
+      console.log("[OKX] Connected:", pubKey);
 
-      setPublicKey(response.publicKey.toBase58());
+      setPublicKey(pubKey);      
       setIsConnected(true);
+      // Sensay user check/create
+      if (SENSAY_ORG_SECRET) {
+        await handleSensayUser(pubKey);
+      } else {
+        console.warn("[Sensay] Org secret missing, skipping Sensay user setup.");
+      }
+
     } catch (err) {
       console.error("[OKX] Connection failed:", err);
+      setIsConnected(false);
+      setPublicKey(null);
     }
   };
 

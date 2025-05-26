@@ -1,34 +1,17 @@
-
 import React from 'react';
-import { DashboardMetrics } from '@/components/crypto/DashboardMetrics';
-import { PortfolioOverview } from '@/components/crypto/PortfolioOverview';
-import { MarketOverview } from '@/components/crypto/MarketOverview';
-import { AIInsights } from '@/components/crypto/AIInsights';
-import { TradingRecommendations } from '@/components/crypto/TradingRecommendations';
-import { AIAssistant } from '@/components/layout/AIAssistant';
+import { DracChat } from '@/components/crypto/DracChat';
 
 export default function Dashboard() {
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
-      
-      <DashboardMetrics />
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <div className="space-y-6">
-            <PortfolioOverview />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <AIInsights />
-              <TradingRecommendations />
-            </div>
-          </div>
-        </div>
-        <div>
-          <div className="space-y-6">
-            <MarketOverview />
-          </div>
-        </div>
+    <div className="flex h-[calc(100vh-64px)]"> {/* 64px = header height, adjust as needed */}
+      {/* Left: Main dashboard content */}
+      <div className="w-1/2 p-6 space-y-6 overflow-y-auto">
+        <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+        {/* ...other dashboard widgets/content here... */}
+      </div>
+      {/* Right: Drac Chat */}
+      <div className="w-1/2 h-full flex flex-col bg-gradient-to-br from-[#6c63ff] to-[#4e54c8]">
+        <DracChat />
       </div>
     </div>
   );
