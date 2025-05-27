@@ -15,6 +15,7 @@ import {
   TokenAddressQuery,
 } from '@/services/okxDexService';
 import ConnectInjectedWallet from "@/components/crypto/ConnectWalletButton";
+
 const Wallet = () => {
   // Solana Devnet context
   const {
@@ -103,18 +104,18 @@ const Wallet = () => {
     !address ? '' : `${address.slice(0, 4)}...${address.slice(-4)}`;
 
   return (
-    <div className="p-6 space-y-8">
-      <h1 className="text-2xl font-bold mb-6">OKX Wallet</h1>
+    <div className="p-8 space-y-10 bg-black min-h-screen">
+      <h1 className="text-3xl font-bold mb-8 text-[#00ff88] tracking-tight">Wallet Overview</h1>
       {error && (
-        <div className="bg-red-500/10 border border-red-500/30 text-red-500 p-4 rounded-md">
+        <div className="bg-red-500/10 border border-red-500/30 text-red-500 p-4 rounded-lg">
           {error}
         </div>
       )}
 
       {/* --- Section 1: Solana Devnet --- */}
-      <Card className="glass-effect mb-8">
+      <Card className="bg-[#141a1f] border border-[#00ff88]/20 rounded-2xl shadow-2xl mb-10">
         <CardHeader>
-          <CardTitle className="flex items-center">
+          <CardTitle className="flex items-center text-[#00ff88]">
             <WalletIcon className="h-5 w-5 mr-2" />
             Solana Devnet Wallet
           </CardTitle>
@@ -122,23 +123,23 @@ const Wallet = () => {
         <CardContent>
           {loading ? (
             <div className="flex justify-center items-center h-32">
-              <Loader2 className="h-8 w-8 animate-spin" />
+              <Loader2 className="h-8 w-8 animate-spin text-[#00ff88]" />
             </div>
           ) : (
             <div className="space-y-4">
               {connected ? (
-                <Card className="bg-secondary/30 border-crypto-accent">
+                <Card className="bg-[#181f1b] border border-[#00ff88]/30 rounded-xl">
                   <CardContent className="p-4">
                     <div className="flex justify-between items-center">
                       <div>
-                        <p className="text-sm text-muted-foreground">OKX Wallet</p>
-                        <p className="font-mono text-xs mt-1">
+                        <p className="text-sm text-[#00ff88]/80">OKX Wallet</p>
+                        <p className="font-mono text-xs mt-1 text-[#00ff88]/70">
                           {formatAddress(walletAddress)}
                         </p>
                       </div>
                       <div className="text-right">
-                        <div className="text-xl font-bold">{balance.toFixed(4)} SOL</div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-2xl font-bold text-[#00ff88]">{balance.toFixed(4)} SOL</div>
+                        <div className="text-sm text-[#00ff88]/60">
                           ${(balance * 150).toFixed(2)}
                         </div>
                       </div>
@@ -147,8 +148,11 @@ const Wallet = () => {
                 </Card>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-muted-foreground mb-4">OKX Wallet not connected</p>
-                  <Button onClick={connect}>
+                  <p className="text-[#00ff88]/60 mb-4">OKX Wallet not connected</p>
+                  <Button
+                    onClick={connect}
+                    className="bg-gradient-to-br from-[#00ff88] to-[#00cc6a] text-black font-bold px-6 py-2 rounded-xl shadow-lg hover:from-[#00cc6a] hover:to-[#00ff88] transition"
+                  >
                     <WalletIcon className="mr-2 h-4 w-4" />
                     Connect OKX Wallet
                   </Button>
@@ -157,13 +161,13 @@ const Wallet = () => {
             </div>
           )}
           <div className="flex space-x-2 mt-6">
-            <Button className="flex-1" size="sm" disabled={!connected}>
+            <Button className="flex-1 bg-[#00ff88]/10 text-[#00ff88] border-[#00ff88]/30 rounded-xl" size="sm" disabled={!connected}>
               <ArrowDownToLine className="mr-2 h-4 w-4" /> Receive
             </Button>
-            <Button className="flex-1" size="sm" disabled={!connected}>
+            <Button className="flex-1 bg-[#00ff88]/10 text-[#00ff88] border-[#00ff88]/30 rounded-xl" size="sm" disabled={!connected}>
               <ArrowUpFromLine className="mr-2 h-4 w-4" /> Send
             </Button>
-            <Button className="flex-1" size="sm" variant="outline" disabled={!connected}>
+            <Button className="flex-1 border-[#00ff88]/30 text-[#00ff88] rounded-xl" size="sm" variant="outline" disabled={!connected}>
               <Repeat className="mr-2 h-4 w-4" /> Swap
             </Button>
           </div>
@@ -171,72 +175,76 @@ const Wallet = () => {
       </Card>
 
       {/* --- Section 2: Multi-Chain Portfolio --- */}
-      <Card className="glass-effect mb-8">
+      <Card className="bg-[#141a1f] border border-[#00ff88]/20 rounded-2xl shadow-2xl mb-10">
         <CardHeader>
-          <CardTitle className="flex items-center">
+          <CardTitle className="flex items-center text-[#00ff88]">
             <span className="mr-2">🌐</span>
             Multi-Chain Portfolio (OKX Wallet API)
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex flex-wrap gap-2 items-center">
-            <span className="font-semibold text-cyan-200 mr-2">Chains:</span>
+            <span className="font-semibold text-[#00ff88] mr-2">Chains:</span>
             {chains.map(chain => (
               <Button
                 key={chain.chainIndex}
                 size="sm"
                 variant={selectedChains.includes(chain.chainIndex) ? "default" : "outline"}
                 onClick={() => handleChainToggle(chain.chainIndex)}
-                className={`flex items-center gap-1 ${selectedChains.includes(chain.chainIndex) ? "ring-2 ring-cyan-400" : ""}`}
+                className={`flex items-center gap-1 rounded-lg ${
+                  selectedChains.includes(chain.chainIndex)
+                    ? "ring-2 ring-[#00ff88] bg-[#00ff88]/10 text-[#00ff88]"
+                    : "hover:bg-[#00ff88]/10 hover:text-[#00ff88] text-[#aaa]"
+                }`}
               >
                 <img src={chain.logoUrl} alt={chain.shortName} className="h-5 w-5 rounded-full" />
                 {chain.shortName}
               </Button>
             ))}
-            <label className="ml-4 flex items-center gap-1 text-xs cursor-pointer">
+            <label className="ml-4 flex items-center gap-1 text-xs cursor-pointer text-[#00ff88]/80">
               <input
                 type="checkbox"
                 checked={filterRisk}
                 onChange={e => setFilterRisk(e.target.checked)}
-                className="accent-cyan-500"
+                className="accent-[#00ff88]"
               />
               Filter risky tokens
             </label>
           </div>
           <div className="mb-4">
-            <span className="font-semibold text-cyan-200">Total Value:</span>{" "}
-            <span className="text-lg font-bold text-cyan-300">${parseFloat(totalValue).toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+            <span className="font-semibold text-[#00ff88]">Total Value:</span>{" "}
+            <span className="text-lg font-bold text-[#00ff88]">${parseFloat(totalValue).toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
           </div>
           {loadingPortfolio ? (
             <div className="flex justify-center items-center h-24">
-              <Loader2 className="h-8 w-8 animate-spin" />
+              <Loader2 className="h-8 w-8 animate-spin text-[#00ff88]" />
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm text-left">
                 <thead>
-                  <tr className="border-b border-cyan-700/20">
-                    <th className="py-2 px-2">Token</th>
-                    <th className="py-2 px-2">Chain</th>
-                    <th className="py-2 px-2">Balance</th>
-                    <th className="py-2 px-2">USD Value</th>
-                    <th className="py-2 px-2">Risk</th>
+                  <tr className="border-b border-[#00ff88]/20">
+                    <th className="py-2 px-2 text-[#00ff88]">Token</th>
+                    <th className="py-2 px-2 text-[#00ff88]">Chain</th>
+                    <th className="py-2 px-2 text-[#00ff88]">Balance</th>
+                    <th className="py-2 px-2 text-[#00ff88]">USD Value</th>
+                    <th className="py-2 px-2 text-[#00ff88]">Risk</th>
                   </tr>
                 </thead>
                 <tbody>
                   {tokenAssets.length > 0 ? tokenAssets.map(token => (
-                    <tr key={token.tokenAddress + token.chainIndex} className="border-b border-cyan-700/10">
-                      <td className="py-2 px-2 font-mono">{token.symbol}</td>
-                      <td className="py-2 px-2">{chains.find(c => c.chainIndex === token.chainIndex)?.shortName}</td>
-                      <td className="py-2 px-2">{parseFloat(token.balance).toLocaleString(undefined, { maximumFractionDigits: 6 })}</td>
-                      <td className="py-2 px-2">${(parseFloat(token.balance) * parseFloat(token.tokenPrice || "0")).toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
+                    <tr key={token.tokenAddress + token.chainIndex} className="border-b border-[#00ff88]/10">
+                      <td className="py-2 px-2 font-mono text-[#00ff88]/90">{token.symbol}</td>
+                      <td className="py-2 px-2 text-[#00ff88]/80">{chains.find(c => c.chainIndex === token.chainIndex)?.shortName}</td>
+                      <td className="py-2 px-2 text-[#00ff88]/80">{parseFloat(token.balance).toLocaleString(undefined, { maximumFractionDigits: 6 })}</td>
+                      <td className="py-2 px-2 text-[#00ff88]/80">${(parseFloat(token.balance) * parseFloat(token.tokenPrice || "0")).toLocaleString(undefined, { maximumFractionDigits: 2 })}</td>
                       <td className="py-2 px-2">
                         {token.isRiskToken ? <span className="text-red-400">Risk</span> : <span className="text-green-400">Safe</span>}
                       </td>
                     </tr>
                   )) : (
                     <tr>
-                      <td colSpan={5} className="py-4 text-center text-muted-foreground">
+                      <td colSpan={5} className="py-4 text-center text-[#00ff88]/50">
                         {selectedChains.length === 0
                           ? "Select a chain to view assets."
                           : "No tokens found for selected chains/address."}
@@ -250,8 +258,8 @@ const Wallet = () => {
 
           {/* --- Specific Token Balance Inline --- */}
           {selectedChains.length === 1 && (
-            <div className="mt-8 bg-[#1a2236] rounded-xl p-4">
-              <h3 className="font-bold mb-2 text-cyan-200">Check Specific Token Balance</h3>
+            <div className="mt-8 bg-[#181f1b] border border-[#00ff88]/20 rounded-xl p-4">
+              <h3 className="font-bold mb-2 text-[#00ff88]">Check Specific Token Balance</h3>
               <div className="mb-2">
                 <Button
                   size="sm"
@@ -261,13 +269,13 @@ const Wallet = () => {
                     setSelectedToken(null);
                     setSpecificTokenBalance(null);
                   }}
-                  className="flex items-center gap-1 mb-2"
+                  className="flex items-center gap-1 mb-2 text-[#00ff88] border-[#00ff88]/30"
                 >
                   <img src={chains.find(c => c.chainIndex === selectedChains[0])?.logoUrl} alt="" className="h-5 w-5 rounded-full" />
                   {chains.find(c => c.chainIndex === selectedChains[0])?.shortName}
                 </Button>
                 <select
-                  className="w-full md:w-1/2 border rounded px-2 py-1 bg-[#181f2a] text-cyan-100"
+                  className="w-full md:w-1/2 border rounded px-2 py-1 bg-[#161a1e] text-[#00ff88]"
                   value={selectedToken?.tokenContractAddress || ""}
                   onChange={e => {
                     const token = tokenList.find(t => t.tokenContractAddress === e.target.value);
@@ -291,25 +299,25 @@ const Wallet = () => {
               </div>
               <Button
                 size="sm"
-                className="mt-2"
+                className="mt-2 bg-gradient-to-br from-[#00ff88] to-[#00cc6a] text-black font-bold rounded-xl shadow-lg hover:from-[#00cc6a] hover:to-[#00ff88] transition"
                 disabled={!selectedChainForToken || !walletAddress || !selectedToken || loadingToken}
                 onClick={handleCheckTokenBalance}
               >
                 {loadingToken ? "Checking..." : "Check Balance"}
               </Button>
               {specificTokenBalance && (
-                <div className="mt-4 bg-[#232a3b] rounded p-4">
+                <div className="mt-4 bg-[#232a3b] border border-[#00ff88]/10 rounded p-4">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-cyan-200">{specificTokenBalance.symbol}</span>
-                    <span className="ml-2 text-xs text-cyan-400">
+                    <span className="font-bold text-[#00ff88]">{specificTokenBalance.symbol}</span>
+                    <span className="ml-2 text-xs text-[#00ff88]/80">
                       {chains.find(c => c.chainIndex === specificTokenBalance.chainIndex)?.shortName}
                     </span>
                   </div>
                   <div className="mt-2">
-                    <span className="text-lg font-mono">
+                    <span className="text-lg font-mono text-[#00ff88]">
                       {parseFloat(specificTokenBalance.balance).toLocaleString(undefined, { maximumFractionDigits: 8 })}
                     </span>
-                    <span className="ml-2 text-cyan-200">
+                    <span className="ml-2 text-[#00ff88]/80">
                       {parseFloat(specificTokenBalance.tokenPrice || "0") > 0
                         ? `$${(parseFloat(specificTokenBalance.balance) * parseFloat(specificTokenBalance.tokenPrice)).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
                         : "No price"}
@@ -328,18 +336,19 @@ const Wallet = () => {
           )}
         </CardContent>
       </Card>
-      <ConnectInjectedWallet
-        walletAddress={walletAddress}
-        solanaDevnetBalance={balance}
-        solanaDevnetUsd={balance * 150}
-        multiChainAssets={tokenAssets}
-        chainsMap={Object.fromEntries(chains.map(c => [c.chainIndex, c.shortName]))}
-        totalValue={totalValue}
-      />
 
-
-      {/* --- Section 3: Transactions (existing logic or enhance as needed) --- */}
-      {/* ...your existing transactions panel here... */}
+      {/* ConnectInjectedWallet (keep this at the end, or use a modal for UX) */}
+      <div className="mt-10 flex justify-center">
+        <ConnectInjectedWallet
+          walletAddress={walletAddress}
+          solanaDevnetBalance={balance}
+          solanaDevnetUsd={balance * 150}
+          multiChainAssets={tokenAssets}
+          chainsMap={Object.fromEntries(chains.map(c => [c.chainIndex, c.shortName]))}
+          totalValue={totalValue}
+        />
+      </div>
+      {/* --- Section 3: Transactions (add your own logic/UI here) --- */}
     </div>
   );
 };
