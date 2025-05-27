@@ -39,11 +39,6 @@ const menuItems = [
     path: "/markets"
   },
   {
-    title: "Trading",
-    icon: CircleDollarSign,
-    path: "/trading"
-  },
-  {
     title: "Swap",
     icon: Bitcoin,
     path: "/swap"
