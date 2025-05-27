@@ -8,7 +8,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Markets from "./pages/Markets";
 import Wallet from "./pages/Wallet";
-import Trading from "./pages/Trading";
+import TradingPage from "./pages/Trading"; 
 import Swap from "./pages/Swap";
 import Data from "./pages/Data";
 import Settings from "./pages/Settings";
@@ -19,6 +19,7 @@ import { WalletProvider } from "./contexts/WalletContext";
 import { AiSuggestionsProvider } from "@/contexts/AiSuggestionsContext";
 import { useEffect } from 'react';
 import { AIAssistant } from './components/ai/AIAssistant';
+import { TradeBar } from './components/trading/TradeBar';
 
 const queryClient = new QueryClient();
 
@@ -58,13 +59,16 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background text-foreground">
-        <AppSidebar />
-        <div className="flex-1 flex flex-col">
-          <Header />
-          <div className="flex-1 overflow-auto">
-            {children}
-            <AIAssistant />
+      <div className="flex flex-col min-h-screen">
+        <div className="flex flex-1 overflow-hidden">
+          <AppSidebar />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <Header />
+            <TradeBar className="sticky top-0 z-10" />
+            <div className="flex-1 overflow-auto">
+              {children}
+              <AIAssistant />
+            </div>
           </div>
         </div>
       </div>
@@ -107,7 +111,7 @@ const App = () => (
                 path="/trading" 
                 element={
                   <Layout>
-                    <Trading />
+                    <TradingPage /> 
                   </Layout>
                 } 
               />
