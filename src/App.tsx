@@ -16,7 +16,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { WalletProvider } from "./contexts/WalletContext";
-
+import { AiSuggestionsProvider } from "@/contexts/AiSuggestionsContext";
 const queryClient = new QueryClient();
 
 // Layout component to maintain consistent structure across routes
@@ -37,6 +37,7 @@ const Layout = ({ children }) => (
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <WalletProvider>
+      <AiSuggestionsProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -104,6 +105,7 @@ const App = () => (
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
+      </AiSuggestionsProvider>
     </WalletProvider>
   </QueryClientProvider>
 );

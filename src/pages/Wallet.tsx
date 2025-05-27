@@ -14,7 +14,7 @@ import {
   TokenAsset,
   TokenAddressQuery,
 } from '@/services/okxDexService';
-
+import ConnectInjectedWallet from "@/components/crypto/ConnectWalletButton";
 const Wallet = () => {
   // Solana Devnet context
   const {
@@ -328,6 +328,15 @@ const Wallet = () => {
           )}
         </CardContent>
       </Card>
+      <ConnectInjectedWallet
+        walletAddress={walletAddress}
+        solanaDevnetBalance={balance}
+        solanaDevnetUsd={balance * 150}
+        multiChainAssets={tokenAssets}
+        chainsMap={Object.fromEntries(chains.map(c => [c.chainIndex, c.shortName]))}
+        totalValue={totalValue}
+      />
+
 
       {/* --- Section 3: Transactions (existing logic or enhance as needed) --- */}
       {/* ...your existing transactions panel here... */}

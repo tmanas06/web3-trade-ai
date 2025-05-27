@@ -15,11 +15,11 @@ function formatTokenAsset(token: TokenAsset, chainName: string) {
 
 // Main portfolio formatter
 export function formatPortfolioPrompt({
-  solanaDevnetBalance,
-  solanaDevnetUsd,
-  multiChainAssets,
-  chainsMap,
-  totalValue
+  solanaDevnetBalance = 0,
+  solanaDevnetUsd = 0,
+  multiChainAssets = [],
+  chainsMap = {},
+  totalValue = "0"
 }: {
   solanaDevnetBalance: number,
   solanaDevnetUsd: number,
@@ -27,36 +27,46 @@ export function formatPortfolioPrompt({
   chainsMap: Record<string, string>,
   totalValue: string
 }) {
-  // Solana Devnet
+  const hasAssets = solanaDevnetBalance > 0 || multiChainAssets.length > 0 || parseFloat(totalValue) > 0;
+  
+  if (!hasAssets) {
+    return [
+      "I'm new to cryptocurrency and DeFi. My wallet is currently empty.",
+      "Please provide 3 beginner-friendly recommendations for:",
+      "1. How to safely acquire my first crypto assets",
+      "2. Basic DeFi concepts I should understand",
+      "3. Best practices for wallet security",
+      "Make the suggestions educational and suitable for complete beginners."
+    ].join('\n');
+  }
+
   const solanaSection = solanaDevnetBalance > 0
-    ? `- SOL (Solana Devnet): ${solanaDevnetBalance.toLocaleString(undefined, { maximumFractionDigits: 8 })} ($${solanaDevnetUsd.toLocaleString(undefined, { maximumFractionDigits: 2 })})`
+    ? `- SOL (Solana Devnet): ${solanaDevnetBalance.toFixed(4)} ($${(solanaDevnetUsd).toFixed(2)})`
     : "No Solana Devnet assets";
 
-  // Multi-chain tokens
   const multiChainSection = multiChainAssets.length > 0
-    ? multiChainAssets.map(token => formatTokenAsset(token, chainsMap[token.chainIndex] || "Unknown")).join('\n')
+    ? multiChainAssets.map(token => 
+        `- ${token.symbol} (${chainsMap[token.chainIndex] || 'Unknown'}): ` +
+        `${parseFloat(token.balance).toFixed(4)} ($${(parseFloat(token.balance) * parseFloat(token.tokenPrice || '0')).toFixed(2)})`
+      ).join('\n')
     : "No multi-chain assets";
 
-  // Total value
-  const totalValueSection = totalValue && parseFloat(totalValue) > 0
-    ? `Total multi-chain portfolio value: $${parseFloat(totalValue).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
-    : "Total multi-chain portfolio value: $0";
-
-  // Final prompt
   return [
-    `Hey drac, these are my assets:`,
-    "",
+    `Hey Drac, these are my assets:`,
     `Solana Devnet:`,
     solanaSection,
-    "",
     `Multi-Chain Portfolio:`,
     multiChainSection,
+    `Total Portfolio Value: $${parseFloat(totalValue).toFixed(2)}`,
     "",
-    totalValueSection,
-    "",
-    "I need suggestions, my assets are idle, what to do?"
+    "Please provide 3 personalized recommendations for:",
+    "1. Asset allocation improvements",
+    "2. Potential earning opportunities",
+    "3. Risk management strategies",
+    "Format as numbered list with brief explanations."
   ].join('\n');
 }
+
 
 // Helper to format a swap/quote for the AI
 export function formatSwapPrompt({

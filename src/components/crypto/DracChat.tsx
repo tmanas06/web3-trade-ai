@@ -76,7 +76,7 @@ export const DracChat = () => {
       {/* Header */}
       <div className="flex items-center gap-3 px-6 py-4 border-b border-white/10 bg-[#6c63ff]/80">
         <img
-          src="https://cdn.mos.cms.futurecdn.net/JBmrUyimnDL4eUZij2iC6k-600-80.jpg.webp"
+          src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/4359196a-1bc4-4d5e-9675-959667382b70/dju56b1-1496f59a-4fc6-404a-953c-2a1ac548ccae.jpg/v1/fill/w_894,h_894,q_70,strp/alien_human_by_captain773_dju56b1-pre.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTAyNCIsInBhdGgiOiJcL2ZcLzQzNTkxOTZhLTFiYzQtNGQ1ZS05Njc1LTk1OTY2NzM4MmI3MFwvZGp1NTZiMS0xNDk2ZjU5YS00ZmM2LTQwNGEtOTUzYy0yYTFhYzU0OGNjYWUuanBnIiwid2lkdGgiOiI8PTEwMjQifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.PKygStponPDUK_VDQHx41eA-2RofJHlZXobBXy9W8Tw"
           alt="Drac"
           className="h-12 w-12 rounded-full object-cover border-2 border-white shadow"
         />

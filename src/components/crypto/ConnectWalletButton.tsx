@@ -1,33 +1,43 @@
 import React, { useEffect, useState } from "react";
+import { useAiSuggestions } from "@/contexts/AiSuggestionsContext";
+
 const SENSAY_API_BASE = "https://api.sensay.io/v1/users";
 const SENSAY_API_VERSION = "2025-03-25";
 const SENSAY_ORG_SECRET = import.meta.env.VITE_SENSAY_ORG_SECRET as string;
+const SENSAY_REPLICA_ID = "deed723e-62f0-4416-8cec-4be4d0a8692e";
+const SENSAY_CHAT_URL = `https://api.sensay.io/v1/replicas/${SENSAY_REPLICA_ID}/chat/completions`;
 
-const ConnectInjectedWallet: React.FC = () => {
-  const [publicKey, setPublicKey] = useState<string | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
+interface TokenAsset {
+  symbol: string;
+  balance: string;
+  tokenPrice: string;
+  chainIndex: string;
+}
 
-  // Check initial connection status on mount
-  useEffect(() => {
-    const checkConnection = async () => {
-      if (window.okxwallet?.solana?.isConnected) {
-        try {
-          const accounts = await window.okxwallet.solana.connect();
-          setPublicKey(accounts.publicKey.toBase58());
-          setIsConnected(true);
-        } catch (err) {
-          console.error("Connection check failed:", err);
-        }
-      }
-    };
-    
-    checkConnection();
-  }, []);
+interface ConnectInjectedWalletProps {
+  walletAddress: string | null;
+  solanaDevnetBalance: number;
+  solanaDevnetUsd: number;
+  multiChainAssets: TokenAsset[];
+  chainsMap: Record<string, string>;
+  totalValue: string;
+}
 
-   // Sensay user check/create logic
-const handleSensayUser = async (walletAddress: string) => {
+const ConnectInjectedWallet: React.FC<ConnectInjectedWalletProps> = ({
+  walletAddress,
+  solanaDevnetBalance,
+  solanaDevnetUsd,
+  multiChainAssets,
+  chainsMap,
+  totalValue,
+}) => {
+  const [publicKey, setPublicKey] = useState<string | null>(walletAddress || null);
+  const [isConnected, setIsConnected] = useState(!!walletAddress);
+   const { setAiContent } = useAiSuggestions();
+
+  // Sensay user check/create logic (unchanged)
+  const handleSensayUser = async (walletAddress: string) => {
     try {
-      // 1. Check if user exists
       const checkResponse = await fetch(`${SENSAY_API_BASE}/${walletAddress}`, {
         headers: {
           "X-ORGANIZATION-SECRET": SENSAY_ORG_SECRET,
@@ -40,7 +50,6 @@ const handleSensayUser = async (walletAddress: string) => {
         return true;
       }
 
-      // 2. If not found (404), create user
       if (checkResponse.status === 404) {
         const requestBody = {
           name: walletAddress,
@@ -73,7 +82,87 @@ const handleSensayUser = async (walletAddress: string) => {
     return false;
   };
 
+  // Build prompt and send to Sensay
+  const sendPromptToSensay = async (walletAddress: string) => {
+    // Determine if user has assets
+    const hasAssets =
+      solanaDevnetBalance > 0 ||
+      (multiChainAssets && multiChainAssets.length > 0) ||
+      (totalValue && parseFloat(totalValue) > 0);
 
+    let prompt: string;
+    if (!hasAssets) {
+      prompt = [
+        "I'm new to cryptocurrency and DeFi. My wallet is currently empty.",
+        "Please provide 3 beginner-friendly recommendations for:",
+        "1. How to safely acquire my first crypto assets",
+        "2. Basic DeFi concepts I should understand",
+        "3. Best practices for wallet security",
+        "Make the suggestions educational and suitable for complete beginners."
+      ].join('\n');
+    } else {
+      const solanaSection = solanaDevnetBalance > 0
+        ? `- SOL (Solana Devnet): ${solanaDevnetBalance.toFixed(4)} ($${solanaDevnetUsd.toFixed(2)})`
+        : "No Solana Devnet assets";
+
+      const multiChainSection = multiChainAssets.length > 0
+        ? multiChainAssets.map(token =>
+            `- ${token.symbol} (${chainsMap[token.chainIndex] || 'Unknown'}): ` +
+            `${parseFloat(token.balance).toFixed(4)} ($${(parseFloat(token.balance) * parseFloat(token.tokenPrice || '0')).toFixed(2)})`
+          ).join('\n')
+        : "No multi-chain assets";
+
+      prompt = [
+        `Hey Drac, these are my assets:`,
+        `Solana Devnet:`,
+        solanaSection,
+        `Multi-Chain Portfolio:`,
+        multiChainSection,
+        `Total Portfolio Value: $${parseFloat(totalValue).toFixed(2)}`,
+        "",
+        "Please provide 3 personalized recommendations for:",
+        "1. Asset allocation improvements",
+        "2. Potential earning opportunities",
+        "3. Risk management strategies",
+        "Format as numbered list with brief explanations."
+      ].join('\n');
+    }
+
+    try {
+      const response = await fetch(SENSAY_CHAT_URL, {
+        method: "POST",
+        headers: {
+          "accept": "application/json",
+          "X-API-Version": SENSAY_API_VERSION,
+          "X-ORGANIZATION-SECRET": SENSAY_ORG_SECRET,
+          "X-USER-ID": walletAddress,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          content: prompt,
+          skip_chat_history: false,
+          source: "embed"
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("[Sensay] Error from AI:", errorText);
+        return;
+      }
+
+      const data = await response.json();
+      console.log("[Sensay] AI Suggestions:", data);
+        if (data && data.content) setAiContent(data.content);
+
+      
+      // You can now display or store the AI's suggestions as needed
+    } catch (err) {
+      console.error("[Sensay] Failed to get AI suggestions:", err);
+    }
+  };
+
+  // Call sendPromptToSensay after connect
   const handleConnect = async () => {
     try {
       if (!window.okxwallet?.solana) {
@@ -82,29 +171,23 @@ const handleSensayUser = async (walletAddress: string) => {
       }
 
       if (isConnected) {
-        // Handle disconnect
         await window.okxwallet.solana.disconnect();
         setIsConnected(false);
         setPublicKey(null);
         return;
       }
 
-      console.log("[OKX] Attempting to connect...");
       const response = await window.okxwallet.solana.connect();
-      console.log("[OKX] Connected:", response?.publicKey?.toBase58?.());
-      
-const pubKey = response.publicKey.toBase58();
-      console.log("[OKX] Connected:", pubKey);
-
-      setPublicKey(pubKey);      
+      const pubKey = response.publicKey.toBase58();
+      setPublicKey(pubKey);
       setIsConnected(true);
-      // Sensay user check/create
+
       if (SENSAY_ORG_SECRET) {
         await handleSensayUser(pubKey);
+        await sendPromptToSensay(pubKey);
       } else {
         console.warn("[Sensay] Org secret missing, skipping Sensay user setup.");
       }
-
     } catch (err) {
       console.error("[OKX] Connection failed:", err);
       setIsConnected(false);
@@ -117,23 +200,18 @@ const pubKey = response.publicKey.toBase58();
     if (!provider) return;
 
     const handleConnect = () => {
-      console.log("[OKX] Wallet connected!");
       setIsConnected(true);
     };
 
     const handleDisconnect = () => {
-      console.log("[OKX] Wallet disconnected!");
       setIsConnected(false);
       setPublicKey(null);
     };
 
     const handleAccountChanged = (publicKey: { toBase58: () => string }) => {
       if (publicKey) {
-        const newKey = publicKey.toBase58();
-        console.log(`[OKX] Switched to account ${newKey}`);
-        setPublicKey(newKey);
+        setPublicKey(publicKey.toBase58());
       } else {
-        console.warn("[OKX] No account available after change");
         handleDisconnect();
       }
     };
@@ -150,18 +228,19 @@ const pubKey = response.publicKey.toBase58();
   }, []);
 
   return (
+
     <div className="p-4">
       <button
         onClick={handleConnect}
         className={`px-4 py-2 rounded ${
-          isConnected 
+          isConnected
             ? "bg-red-600 hover:bg-red-700 text-white"
             : "bg-green-600 hover:bg-green-700 text-white"
         }`}
       >
         {isConnected ? "Disconnect Wallet" : "Connect OKX Wallet"}
       </button>
-      
+
       {publicKey && (
         <div className="mt-4">
           <p className="text-sm font-mono">
@@ -171,6 +250,7 @@ const pubKey = response.publicKey.toBase58();
       )}
     </div>
   );
+  
 };
 
 export default ConnectInjectedWallet;

@@ -1,43 +1,29 @@
-
 import React from 'react';
-import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Search } from 'lucide-react';
 import ConnectWalletButton from '@/components/crypto/ConnectWalletButton';
 
 export function Header() {
-  // Function to toggle AI Assistant visibility
-  const toggleAIAssistant = () => {
-    const event = new CustomEvent('toggle-ai-assistant');
-    window.dispatchEvent(event);
-  };
-
   return (
-    <header className="border-b border-white/10 py-3 px-6">
+    <header className="border-b border-[#1a1a1a] bg-black py-3 px-8 shadow-md">
       <div className="flex items-center justify-between">
+        {/* Left: Sidebar and Search */}
         <div className="flex items-center">
           <SidebarTrigger />
-          <div className="ml-4 relative">
+          <div className="ml-6 relative">
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <Search className="h-4 w-4 text-gray-400" />
+              <Search className="h-5 w-5 text-[#00ff88]" />
             </div>
             <input
               type="text"
               placeholder="Search markets, assets..."
-              className="bg-secondary/50 border border-white/10 rounded-md py-1.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-crypto-accent w-64"
+              className="bg-[#161a1e] border border-[#222] rounded-xl py-2 pl-11 pr-4 text-sm text-white placeholder:text-[#00ff88]/60 focus:outline-none focus:ring-2 focus:ring-[#00ff88] w-72 transition"
             />
           </div>
         </div>
+        {/* Right: Connect Wallet */}
         <div className="flex items-center space-x-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="border-crypto-accent text-crypto-accent hover:bg-crypto-accent/10"
-            onClick={toggleAIAssistant}
-          >
-            AI Assistant
-          </Button>
-          <ConnectWalletButton />
+          <ConnectWalletButton walletAddress={''} solanaDevnetBalance={0} solanaDevnetUsd={0} multiChainAssets={[]} chainsMap={undefined} totalValue={''}/>
         </div>
       </div>
     </header>
