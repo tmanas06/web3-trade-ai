@@ -1,9 +1,9 @@
-name: Run Backend
+name: Run Server
 
 on: [push, pull_request]
 
 jobs:
-  backend:
+  server:
     runs-on: ubuntu-latest
 
     steps:
@@ -15,13 +15,17 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install backend dependencies (if any)
-        working-directory: ./backend
-        run: |
-          if [ -f package.json ]; then
-            npm install
-          fi
+      - name: Install server dependencies
+        working-directory: ./server
+        run: npm install
 
-      - name: Run backend
-        working-directory: ./backend
+      - name: Create .env file from GitHub Secrets
+        working-directory: ./server
+        run: |
+          echo "OKX_API_KEY=${{ secrets.OKX_API_KEY }}" >> .env
+          echo "OKX_SECRET=${{ secrets.OKX_SECRET }}" >> .env
+          echo "OKX_PASSPHRASE=${{ secrets.OKX_PASSPHRASE }}" >> .env
+
+      - name: Run server
+        working-directory: ./server
         run: node proxy.js

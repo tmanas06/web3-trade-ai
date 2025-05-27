@@ -33,7 +33,8 @@ const ConnectInjectedWallet: React.FC<ConnectInjectedWalletProps> = ({
 }) => {
   const [publicKey, setPublicKey] = useState<string | null>(walletAddress || null);
   const [isConnected, setIsConnected] = useState(!!walletAddress);
-   const { setAiContent } = useAiSuggestions();
+  const [loading, setLoading] = useState(false);
+  const { setAiContent } = useAiSuggestions();
 
   // Sensay user check/create logic (unchanged)
   const handleSensayUser = async (walletAddress: string) => {
@@ -84,7 +85,7 @@ const ConnectInjectedWallet: React.FC<ConnectInjectedWalletProps> = ({
 
   // Build prompt and send to Sensay
   const sendPromptToSensay = async (walletAddress: string) => {
-    // Determine if user has assets
+    setLoading(true);
     const hasAssets =
       solanaDevnetBalance > 0 ||
       (multiChainAssets && multiChainAssets.length > 0) ||
@@ -148,18 +149,17 @@ const ConnectInjectedWallet: React.FC<ConnectInjectedWalletProps> = ({
       if (!response.ok) {
         const errorText = await response.text();
         console.error("[Sensay] Error from AI:", errorText);
+        setLoading(false);
         return;
       }
 
       const data = await response.json();
       console.log("[Sensay] AI Suggestions:", data);
-        if (data && data.content) setAiContent(data.content);
-
-      
-      // You can now display or store the AI's suggestions as needed
+      if (data && data.content) setAiContent(data.content);
     } catch (err) {
       console.error("[Sensay] Failed to get AI suggestions:", err);
     }
+    setLoading(false);
   };
 
   // Call sendPromptToSensay after connect
@@ -228,29 +228,31 @@ const ConnectInjectedWallet: React.FC<ConnectInjectedWalletProps> = ({
   }, []);
 
   return (
-
-    <div className="p-4">
+    <div className="flex flex-col items-center justify-center bg-black rounded-2xl shadow-2xl border border-[#232a3b] p-8 max-w-md mx-auto">
       <button
         onClick={handleConnect}
-        className={`px-4 py-2 rounded ${
-          isConnected
-            ? "bg-red-600 hover:bg-red-700 text-white"
-            : "bg-green-600 hover:bg-green-700 text-white"
-        }`}
+        disabled={loading}
+        className={`w-full px-6 py-3 rounded-xl font-bold text-lg transition-all shadow-lg
+          ${isConnected
+            ? "bg-gradient-to-br from-[#ff4e50] to-[#f9d423] text-black hover:from-[#f9d423] hover:to-[#ff4e50]"
+            : "bg-gradient-to-br from-[#00ff88] to-[#00cc6a] text-black hover:from-[#00cc6a] hover:to-[#00ff88]"
+          }`}
       >
-        {isConnected ? "Disconnect Wallet" : "Connect OKX Wallet"}
+        {isConnected ? "Disconnect Wallet" : loading ? "Connecting..." : "Connect OKX Wallet"}
       </button>
 
       {publicKey && (
-        <div className="mt-4">
-          <p className="text-sm font-mono">
-            Connected: {publicKey.slice(0, 6)}...{publicKey.slice(-6)}
-          </p>
+        <div className="mt-6 flex flex-col items-center">
+          <div className="flex items-center gap-2">
+            <span className="inline-block w-3 h-3 rounded-full bg-[#00ff88] animate-pulse"></span>
+            <span className="text-[#00ff88] font-mono text-sm">
+              Connected: {publicKey.slice(0, 6)}...{publicKey.slice(-6)}
+            </span>
+          </div>
         </div>
       )}
     </div>
   );
-  
 };
 
 export default ConnectInjectedWallet;

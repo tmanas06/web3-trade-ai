@@ -26,7 +26,6 @@ export const DracChat = () => {
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    // Scroll to bottom when new message arrives
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
@@ -72,30 +71,32 @@ export const DracChat = () => {
   };
 
   return (
-    <div className="flex flex-col h-full max-h-[90vh] w-full bg-gradient-to-br from-[#6c63ff] to-[#4e54c8] rounded-3xl shadow-xl p-0 overflow-hidden">
+    <div className="flex flex-col h-full max-h-[90vh] w-full bg-[#121212] rounded-3xl shadow-2xl p-0 overflow-hidden border border-[#232a3b]">
       {/* Header */}
-      <div className="flex items-center gap-3 px-6 py-4 border-b border-white/10 bg-[#6c63ff]/80">
+      <div className="flex items-center gap-3 px-8 py-5 border-b border-[#222] bg-gradient-to-r from-[#181f1b]/80 to-[#181f2b]/70">
         <img
           src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/4359196a-1bc4-4d5e-9675-959667382b70/dju56b1-1496f59a-4fc6-404a-953c-2a1ac548ccae.jpg/v1/fill/w_894,h_894,q_70,strp/alien_human_by_captain773_dju56b1-pre.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTAyNCIsInBhdGgiOiJcL2ZcLzQzNTkxOTZhLTFiYzQtNGQ1ZS05Njc1LTk1OTY2NzM4MmI3MFwvZGp1NTZiMS0xNDk2ZjU5YS00ZmM2LTQwNGEtOTUzYy0yYTFhYzU0OGNjYWUuanBnIiwid2lkdGgiOiI8PTEwMjQifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.PKygStponPDUK_VDQHx41eA-2RofJHlZXobBXy9W8Tw"
           alt="Drac"
-          className="h-12 w-12 rounded-full object-cover border-2 border-white shadow"
+          className="h-14 w-14 rounded-2xl object-cover border-4 border-[#00ff88] shadow-lg"
         />
         <div>
-          <div className="font-semibold text-white">Drac</div>
-          <div className="text-xs text-white/70">Online</div>
+          <div className="font-bold text-white text-xl tracking-wide">Drac</div>
+          <div className="text-xs text-[#00ff88] font-mono">Online</div>
         </div>
       </div>
 
       {/* Chat messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 bg-transparent">
+      <div className="flex-1 overflow-y-auto px-6 py-8 space-y-5 bg-black/80 backdrop-blur-md">
         {messages.map((msg, idx) => (
           <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             <div
-              className={`max-w-[75%] px-4 py-3 rounded-2xl text-base shadow
+              className={`
+                max-w-[75%] px-5 py-4 rounded-2xl text-base shadow-lg
                 ${msg.role === "user"
-                  ? "bg-white text-indigo-800 rounded-br-none"
-                  : "bg-indigo-400/90 text-white rounded-bl-none"
-                }`}
+                  ? "bg-gradient-to-br from-[#00ff88]/90 to-[#00cc6a]/90 text-black rounded-br-none font-semibold"
+                  : "bg-[#181f1b]/80 border border-[#00ff88]/20 text-[#eaffea] rounded-bl-none"
+                }
+              `}
             >
               {msg.content}
             </div>
@@ -103,7 +104,7 @@ export const DracChat = () => {
         ))}
         {loading && (
           <div className="flex justify-start">
-            <div className="max-w-[75%] px-4 py-3 rounded-2xl bg-indigo-400/90 text-white rounded-bl-none shadow">
+            <div className="max-w-[75%] px-5 py-4 rounded-2xl bg-[#181f1b]/80 border border-[#00ff88]/20 text-[#eaffea] rounded-bl-none shadow-lg">
               <span className="animate-pulse">Drac is typing...</span>
             </div>
           </div>
@@ -112,9 +113,9 @@ export const DracChat = () => {
       </div>
 
       {/* Input bar */}
-      <div className="flex items-center gap-2 px-6 py-4 border-t border-white/10 bg-[#6c63ff]/80">
+      <div className="flex items-center gap-3 px-8 py-5 border-t border-[#232a3b] bg-[#161a1e]/80">
         <input
-          className="flex-1 bg-white/90 rounded-full px-4 py-2 text-indigo-800 placeholder-indigo-400 outline-none focus:ring-2 focus:ring-indigo-300"
+          className="flex-1 bg-[#181f1b] border border-[#222] rounded-full px-5 py-3 text-[#00ff88] placeholder-[#00ff88]/50 font-medium outline-none focus:ring-2 focus:ring-[#00ff88] transition"
           placeholder="Type your message…"
           value={input}
           onChange={e => setInput(e.target.value)}
@@ -124,15 +125,15 @@ export const DracChat = () => {
         <button
           onClick={sendMessage}
           disabled={loading || !input.trim()}
-          className="ml-2 h-10 w-10 rounded-full bg-indigo-500 hover:bg-indigo-600 flex items-center justify-center text-white text-xl shadow transition"
+          className="ml-2 h-12 w-12 rounded-full bg-gradient-to-br from-[#00ff88] to-[#00cc6a] flex items-center justify-center text-black text-2xl font-bold shadow-lg hover:from-[#00cc6a] hover:to-[#00ff88] transition"
         >
           {loading ? (
-            <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+            <svg className="animate-spin h-6 w-6" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
             </svg>
           ) : (
-            <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6">
+            <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7">
               <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           )}

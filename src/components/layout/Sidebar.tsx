@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Sidebar, 
@@ -16,7 +15,6 @@ import {
   LayoutDashboard, 
   Wallet, 
   BarChart3, 
-  Network, 
   Settings, 
   CircleDollarSign,
   Bitcoin,
@@ -41,19 +39,9 @@ const menuItems = [
     path: "/markets"
   },
   {
-    title: "Trading",
-    icon: CircleDollarSign,
-    path: "/trading"
-  },
-  {
     title: "Swap",
     icon: Bitcoin,
     path: "/swap"
-  },
-  {
-    title: "Network",
-    icon: Network,
-    path: "/network"
   },
   {
     title: "Data",
@@ -71,33 +59,52 @@ export function AppSidebar() {
   const location = useLocation();
   
   return (
-    <Sidebar>
-      <SidebarHeader className="flex items-center px-4 py-6">
-        <div className="flex items-center space-x-2">
-          <div className="h-8 w-8 rounded-full bg-gradient-to-r from-crypto-accent to-crypto-accent-purple flex items-center justify-center">
-            <span className="text-white font-bold text-lg">AI</span>
+    <Sidebar className="bg-black border-r border-[#1a1a1a]">
+      <SidebarHeader className="px-6 py-8">
+        <div className="flex items-center space-x-3">
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#00ff88] to-[#00cc6a] flex items-center justify-center shadow-lg">
+            <span className="text-black font-bold text-xl">H</span>
           </div>
-          <Link to="/" className="font-bold text-lg text-white">CryptoAI</Link>
+          <span className="bg-gradient-to-r from-[#00ff88] to-[#00cc6a] bg-clip-text text-2xl font-bold text-transparent">
+            HODLHub
+          </span>
         </div>
       </SidebarHeader>
-      <SidebarContent>
+      
+      <SidebarContent className="px-4">
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[#666] text-xs font-medium uppercase tracking-wider px-4 mb-3">
+            Navigation
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
-                    asChild
-                    className={location.pathname === item.path ? 'bg-accent/20' : ''}
-                  >
-                    <Link to={item.path} className="flex items-center">
-                      <item.icon className="h-5 w-5 mr-3" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {menuItems.map((item) => {
+                const isActive = location.pathname === item.path;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      className={`group rounded-xl transition-colors ${
+                        isActive 
+                          ? 'bg-[#00ff88]/10 border border-[#00ff88]/20 text-[#00ff88]' 
+                          : 'hover:bg-[#ffffff]/05 text-[#64f79f]'
+                      }`}
+                    >
+                      <Link 
+                        to={item.path} 
+                        className="flex items-center px-4 py-3 no-underline"
+                      >
+                        <item.icon 
+                          className={`h-5 w-5 mr-3 ${
+                            isActive ? 'text-[#00ff88]' : 'text-[#666] group-hover:text-[#00ff88]'
+                          }`} 
+                        />
+                        <span className="font-medium">{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
