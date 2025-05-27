@@ -16,12 +16,12 @@ jobs:
           node-version: '20'
 
       - name: Install backend dependencies (if any)
-        working-directory: ./backend
+        working-directory: ./server
         run: |
           if [ -f package.json ]; then
             npm install
           fi
 
       - name: Run backend
-        working-directory: ./backend
+        working-directory: ./server
         run: node proxy.js
