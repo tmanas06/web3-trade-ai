@@ -1,9 +1,9 @@
-name: Run Backend
+name: Run Server
 
 on: [push, pull_request]
 
 jobs:
-  backend:
+  server:
     runs-on: ubuntu-latest
 
     steps:
@@ -15,13 +15,10 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install backend dependencies (if any)
+      - name: Install server dependencies
         working-directory: ./server
-        run: |
-          if [ -f package.json ]; then
-            npm install
-          fi
+        run: npm install
 
-      - name: Run backend
+      - name: Run server
         working-directory: ./server
         run: node proxy.js
