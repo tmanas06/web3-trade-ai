@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -6,12 +5,6 @@ import { Search } from 'lucide-react';
 import ConnectWalletButton from '@/components/crypto/ConnectWalletButton';
 
 export function Header() {
-  // Function to toggle AI Assistant visibility
-  const toggleAIAssistant = () => {
-    const event = new CustomEvent('toggle-ai-assistant');
-    window.dispatchEvent(event);
-  };
-
   return (
     <header className="border-b border-white/10 py-3 px-6">
       <div className="flex items-center justify-between">
@@ -29,14 +22,6 @@ export function Header() {
           </div>
         </div>
         <div className="flex items-center space-x-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="border-crypto-accent text-crypto-accent hover:bg-crypto-accent/10"
-            onClick={toggleAIAssistant}
-          >
-            AI Assistant
-          </Button>
           <ConnectWalletButton />
         </div>
       </div>

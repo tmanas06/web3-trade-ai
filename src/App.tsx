@@ -17,6 +17,7 @@ import { AppSidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { WalletProvider } from "./contexts/WalletContext";
 import { useEffect } from 'react';
+import { AIAssistant } from './components/ai/AIAssistant';
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <Header />
           <div className="flex-1 overflow-auto">
             {children}
+            <AIAssistant />
           </div>
         </div>
       </div>
