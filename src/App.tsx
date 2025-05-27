@@ -10,7 +10,6 @@ import Markets from "./pages/Markets";
 import Wallet from "./pages/Wallet";
 import Trading from "./pages/Trading";
 import Swap from "./pages/Swap";
-import Network from "./pages/Network";
 import Data from "./pages/Data";
 import Settings from "./pages/Settings";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -118,14 +117,6 @@ const App = () => (
                 } 
               />
               <Route 
-                path="/network" 
-                element={
-                  <Layout>
-                    <Network />
-                  </Layout>
-                } 
-              />
-              <Route 
                 path="/data" 
                 element={
                   <Layout>
@@ -141,7 +132,6 @@ const App = () => (
                   </Layout>
                 } 
               />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

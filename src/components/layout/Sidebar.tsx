@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Sidebar, 
@@ -16,7 +15,6 @@ import {
   LayoutDashboard, 
   Wallet, 
   BarChart3, 
-  Network, 
   Settings, 
   CircleDollarSign,
   Bitcoin,
@@ -49,11 +47,6 @@ const menuItems = [
     title: "Swap",
     icon: Bitcoin,
     path: "/swap"
-  },
-  {
-    title: "Network",
-    icon: Network,
-    path: "/network"
   },
   {
     title: "Data",
