@@ -65,7 +65,7 @@ export function AppSidebar() {
           <div className="h-8 w-8 rounded-full bg-gradient-to-r from-crypto-accent to-crypto-accent-purple flex items-center justify-center">
             <span className="text-white font-bold text-lg">AI</span>
           </div>
-          <Link to="/" className="font-bold text-lg text-white">CryptoAI</Link>
+          <Link to="/" className="font-bold text-lg text-white">Hodl Hub</Link>
         </div>
       </SidebarHeader>
       <SidebarContent>
