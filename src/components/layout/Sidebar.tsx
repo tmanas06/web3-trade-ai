@@ -24,7 +24,7 @@ import { Link, useLocation } from "react-router-dom";
 
 const menuItems = [
   {
-    title: "Dashboard",
+    title: "Dashboard & AI",
     icon: LayoutDashboard,
     path: "/"
   },

@@ -6,7 +6,7 @@ export default function Dashboard() {
     <div className="flex h-[calc(100vh-64px)]"> {/* 64px = header height, adjust as needed */}
       {/* Left: Main dashboard content */}
       <div className="w-1/2 p-6 space-y-6 overflow-y-auto">
-        <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+        <h1 className="text-2xl font-bold mb-6">Dashboard & AI</h1>
         {/* ...other dashboard widgets/content here... */}
       </div>
       {/* Right: Drac Chat */}
