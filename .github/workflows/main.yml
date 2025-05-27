@@ -19,6 +19,13 @@ jobs:
         working-directory: ./server
         run: npm install
 
+      - name: Create .env file from GitHub Secrets
+        working-directory: ./server
+        run: |
+          echo "OKX_API_KEY=${{ secrets.OKX_API_KEY }}" >> .env
+          echo "OKX_SECRET=${{ secrets.OKX_SECRET }}" >> .env
+          echo "OKX_PASSPHRASE=${{ secrets.OKX_PASSPHRASE }}" >> .env
+
       - name: Run server
         working-directory: ./server
         run: node proxy.js
