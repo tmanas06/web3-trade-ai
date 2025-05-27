@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Trading = () => {
   const [selectedCrypto, setSelectedCrypto] = useState('BTC/USDT');
-  const cryptos = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT', 'ADA/USDT'];
+  const cryptos = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT', 'ADA/USDT', 'VNST/vBTC'];
   const [activeTab, setActiveTab] = useState('limit');
   const [side, setSide] = useState<'buy' | 'sell'>('buy');
 

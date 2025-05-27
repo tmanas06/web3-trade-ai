@@ -15,6 +15,8 @@ const TOKENS: DexToken[] = [
   { chainIndex: "1", tokenContractAddress: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", symbol: "USDC", name: "USD Coin" },
   { chainIndex: "1", tokenContractAddress: "0x6b175474e89094c44da98b954eedeac495271d0f", symbol: "DAI", name: "Dai" },
   { chainIndex: "1", tokenContractAddress: "0x514910771af9ca656af840dff83e8264ecf986ca", symbol: "LINK", name: "Chainlink" },
+  { chainIndex: "1", tokenContractAddress: "0x8c3ee4f778e282b59d42d693a97b80b1edfa5b34", symbol: "VNST", name: "VNST" },
+  { chainIndex: "1", tokenContractAddress: "0x5fbdb2315678afecb367f032d93f642f64180aa3", symbol: "vBTC", name: "vBTC" },
 ];
 
 const Markets: React.FC = () => {
